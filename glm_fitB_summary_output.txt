@@ -1,0 +1,43 @@
+
+Call:
+glm(formula = GCSUIC00 ~ ., family = binomial, data = important_vars_from_rf_train_scaling)
+
+Coefficients:
+                           Estimate Std. Error z value Pr(>|z|)    
+(Intercept)               -2.127549   0.150627 -14.125  < 2e-16 ***
+SDQ_diff.sw6               0.311994   0.281526   1.108  0.26776    
+self_harm.sw62            -1.445963   0.120700 -11.980  < 2e-16 ***
+feel_hatred.sw62           0.199452   0.158141   1.261  0.20723    
+feel_hatred.sw63           0.287548   0.218633   1.315  0.18844    
+SDQ_peer.sw6              -0.104694   0.126152  -0.830  0.40660    
+SDQ_emot_s.sw6            -0.047336   0.113241  -0.418  0.67594    
+SDQ_conduct.sw6            0.002883   0.089751   0.032  0.97438    
+kessler_k6_main.sw6        0.084801   0.044240   1.917  0.05526 .  
+feel_good_others.sw62     -0.078883   0.141434  -0.558  0.57702    
+feel_good_others.sw63      0.192501   0.190387   1.011  0.31197    
+SDQ_prosoc.sw6             0.096692   0.098558   0.981  0.32656    
+cyberbull.sw6             -0.039359   0.036806  -1.069  0.28490    
+feel_not_enjoy.sw62        0.114120   0.123598   0.923  0.35584    
+feel_not_enjoy.sw63        0.234952   0.213716   1.099  0.27161    
+cigarette_freq.sw6         0.069688   0.035374   1.970  0.04883 *  
+feel_no_good.sw62          0.255402   0.156161   1.635  0.10194    
+feel_no_good.sw63          0.410942   0.222750   1.845  0.06506 .  
+feel_not_concent.sw62     -0.115951   0.130432  -0.889  0.37402    
+feel_not_concent.sw63      0.002792   0.177376   0.016  0.98744    
+feel_restless.sw62        -0.057449   0.119632  -0.480  0.63107    
+feel_restless.sw63        -0.259846   0.184578  -1.408  0.15920    
+activitiy_status_main.sw6  0.141341   0.045003   3.141  0.00169 ** 
+sex_CM.sw62                0.351093   0.107580   3.264  0.00110 ** 
+feel_wrong.sw62            0.095497   0.144008   0.663  0.50724    
+feel_wrong.sw63            0.402397   0.206040   1.953  0.05082 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 4214.5  on 8586  degrees of freedom
+Residual deviance: 3477.5  on 8561  degrees of freedom
+AIC: 3529.5
+
+Number of Fisher Scoring iterations: 6
+
