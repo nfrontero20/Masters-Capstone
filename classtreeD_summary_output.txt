@@ -1,0 +1,1765 @@
+Call:
+rpart(formula = GCSUIC00 ~ ., data = important_vars_from_rf_train, 
+    method = "class", control = controlD)
+  n= 8587 
+
+            CP nsplit rel error   xerror       xstd
+1  0.007839721      0 1.0000000 1.000000 0.04032003
+2  0.006968641      5 0.9529617 1.005226 0.04041769
+3  0.006097561      9 0.9250871 1.005226 0.04041769
+4  0.005226481     11 0.9128920 1.022648 0.04074098
+5  0.003484321     12 0.9076655 1.033101 0.04093330
+6  0.002903600     18 0.8832753 1.038328 0.04102901
+7  0.002613240     21 0.8745645 1.052265 0.04128278
+8  0.002264808     28 0.8536585 1.055749 0.04134589
+9  0.002129307     41 0.8188153 1.060976 0.04144031
+10 0.001742160     50 0.7996516 1.069686 0.04159704
+11 0.001045296     63 0.7770035 1.081882 0.04181512
+12 0.001000000     84 0.7543554 1.092334 0.04200081
+
+Variable importance
+            self_harm.sw6              SDQ_diff.sw6 
+                       19                        11 
+             SDQ_peer.sw6           feel_hatred.sw6 
+                        8                         7 
+           SDQ_emot_s.sw6       kessler_k6_main.sw6 
+                        7                         7 
+          SDQ_conduct.sw6            SDQ_prosoc.sw6 
+                        6                         5 
+         feel_no_good.sw6             cyberbull.sw6 
+                        5                         5 
+           feel_wrong.sw6        feel_not_enjoy.sw6 
+                        4                         3 
+       cigarette_freq.sw6      feel_good_others.sw6 
+                        3                         3 
+     feel_not_concent.sw6 activitiy_status_main.sw6 
+                        2                         2 
+        feel_restless.sw6                sex_CM.sw6 
+                        2                         1 
+
+Node number 1: 8587 observations,    complexity param=0.007839721
+  predicted class=0  expected loss=0.06684523  P(node) =1
+    class counts:  8013   574
+   probabilities: 0.933 0.067 
+  left son=2 (7457 obs) right son=3 (1130 obs)
+  Primary splits:
+      self_harm.sw6        splits as  RL,  improve=97.27297, (0 missing)
+      feel_hatred.sw6      splits as  LLR, improve=51.42977, (0 missing)
+      feel_wrong.sw6       splits as  LLR, improve=44.35366, (0 missing)
+      feel_no_good.sw6     splits as  LLR, improve=43.20699, (0 missing)
+      feel_good_others.sw6 splits as  LLR, improve=42.55793, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  LLR,      agree=0.889, adj=0.160, (0 split)
+      feel_no_good.sw6     splits as  LLR,      agree=0.880, adj=0.089, (0 split)
+      feel_wrong.sw6       splits as  LLR,      agree=0.879, adj=0.081, (0 split)
+      cyberbull.sw6        < 2.5  to the right, agree=0.872, adj=0.027, (0 split)
+      feel_good_others.sw6 splits as  LLR,      agree=0.871, adj=0.020, (0 split)
+
+Node number 2: 7457 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.03754861  P(node) =0.8684057
+    class counts:  7177   280
+   probabilities: 0.962 0.038 
+  left son=4 (6110 obs) right son=5 (1347 obs)
+  Primary splits:
+      feel_no_good.sw6     splits as  LRR,      improve=2.403883, (0 missing)
+      feel_hatred.sw6      splits as  LLR,      improve=2.309150, (0 missing)
+      SDQ_diff.sw6         < 19.5 to the left,  improve=2.121211, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=1.856085, (0 missing)
+      feel_wrong.sw6       splits as  LRR,      improve=1.843891, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  LRR, agree=0.878, adj=0.325, (0 split)
+      feel_wrong.sw6       splits as  LRR, agree=0.853, adj=0.185, (0 split)
+      feel_good_others.sw6 splits as  LLR, agree=0.845, adj=0.141, (0 split)
+      feel_not_concent.sw6 splits as  LLR, agree=0.832, adj=0.072, (0 split)
+      feel_not_enjoy.sw6   splits as  LLR, agree=0.826, adj=0.036, (0 split)
+
+Node number 3: 1130 observations,    complexity param=0.007839721
+  predicted class=0  expected loss=0.260177  P(node) =0.1315943
+    class counts:   836   294
+   probabilities: 0.740 0.260 
+  left son=6 (604 obs) right son=7 (526 obs)
+  Primary splits:
+      SDQ_diff.sw6     < 9.5  to the left,  improve=20.09286, (0 missing)
+      SDQ_emot_s.sw6   < 3.5  to the left,  improve=18.86623, (0 missing)
+      SDQ_prosoc.sw6   < 2.5  to the left,  improve=15.23626, (0 missing)
+      feel_wrong.sw6   splits as  LLR,      improve=14.67112, (0 missing)
+      feel_no_good.sw6 splits as  LLR,      improve=14.20485, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6      < 3.5  to the left,  agree=0.799, adj=0.568, (0 split)
+      SDQ_peer.sw6        < 3.5  to the left,  agree=0.795, adj=0.559, (0 split)
+      SDQ_prosoc.sw6      < 2.5  to the left,  agree=0.778, adj=0.523, (0 split)
+      SDQ_conduct.sw6     < 1.5  to the left,  agree=0.752, adj=0.468, (0 split)
+      kessler_k6_main.sw6 < 5.5  to the left,  agree=0.635, adj=0.215, (0 split)
+
+Node number 4: 6110 observations
+  predicted class=0  expected loss=0.03158756  P(node) =0.7115407
+    class counts:  5917   193
+   probabilities: 0.968 0.032 
+
+Node number 5: 1347 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.06458797  P(node) =0.156865
+    class counts:  1260    87
+   probabilities: 0.935 0.065 
+  left son=10 (1307 obs) right son=11 (40 obs)
+  Primary splits:
+      SDQ_diff.sw6        < 23.5 to the left,  improve=3.650254, (0 missing)
+      kessler_k6_main.sw6 < 4.5  to the left,  improve=1.753928, (0 missing)
+      SDQ_conduct.sw6     < 2.5  to the left,  improve=1.740885, (0 missing)
+      SDQ_peer.sw6        < 8.5  to the left,  improve=1.636317, (0 missing)
+      SDQ_prosoc.sw6      < 0.5  to the left,  improve=1.562506, (0 missing)
+  Surrogate splits:
+      SDQ_prosoc.sw6  < 7.5  to the left,  agree=0.976, adj=0.175, (0 split)
+      SDQ_peer.sw6    < 9.5  to the left,  agree=0.974, adj=0.125, (0 split)
+      SDQ_conduct.sw6 < 8.5  to the left,  agree=0.973, adj=0.100, (0 split)
+      SDQ_emot_s.sw6  < 9.5  to the left,  agree=0.972, adj=0.050, (0 split)
+
+Node number 6: 604 observations,    complexity param=0.003484321
+  predicted class=0  expected loss=0.1721854  P(node) =0.07033888
+    class counts:   500   104
+   probabilities: 0.828 0.172 
+  left son=12 (478 obs) right son=13 (126 obs)
+  Primary splits:
+      feel_wrong.sw6       splits as  LLR, improve=5.332007, (0 missing)
+      feel_good_others.sw6 splits as  LLR, improve=4.053008, (0 missing)
+      sex_CM.sw6           splits as  LR,  improve=3.973510, (0 missing)
+      feel_no_good.sw6     splits as  LLR, improve=3.953472, (0 missing)
+      feel_hatred.sw6      splits as  LRR, improve=2.791662, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  LLR,      agree=0.813, adj=0.103, (0 split)
+      feel_good_others.sw6 splits as  LLR,      agree=0.813, adj=0.103, (0 split)
+      feel_no_good.sw6     splits as  LLR,      agree=0.806, adj=0.071, (0 split)
+      feel_not_enjoy.sw6   splits as  LLR,      agree=0.801, adj=0.048, (0 split)
+      kessler_k6_main.sw6  < 22.5 to the left,  agree=0.793, adj=0.008, (0 split)
+
+Node number 7: 526 observations,    complexity param=0.007839721
+  predicted class=0  expected loss=0.3612167  P(node) =0.06125539
+    class counts:   336   190
+   probabilities: 0.639 0.361 
+  left son=14 (359 obs) right son=15 (167 obs)
+  Primary splits:
+      feel_no_good.sw6     splits as  LLR,      improve=9.023366, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=7.435652, (0 missing)
+      feel_wrong.sw6       splits as  LLR,      improve=6.745827, (0 missing)
+      feel_hatred.sw6      splits as  LLR,      improve=6.635299, (0 missing)
+      SDQ_emot_s.sw6       < 5.5  to the left,  improve=6.297726, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  LLR, agree=0.840, adj=0.497, (0 split)
+      feel_wrong.sw6       splits as  LLR, agree=0.810, adj=0.401, (0 split)
+      feel_good_others.sw6 splits as  LLR, agree=0.797, adj=0.359, (0 split)
+      feel_not_concent.sw6 splits as  LLR, agree=0.789, adj=0.335, (0 split)
+      feel_not_enjoy.sw6   splits as  LLR, agree=0.779, adj=0.305, (0 split)
+
+Node number 10: 1307 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.05814843  P(node) =0.1522068
+    class counts:  1231    76
+   probabilities: 0.942 0.058 
+  left son=20 (361 obs) right son=21 (946 obs)
+  Primary splits:
+      SDQ_prosoc.sw6       < 0.5  to the left,  improve=1.1006780, (0 missing)
+      kessler_k6_main.sw6  < 4.5  to the left,  improve=0.9504702, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=0.5550785, (0 missing)
+      feel_hatred.sw6      splits as  LLR,      improve=0.5350622, (0 missing)
+      SDQ_conduct.sw6      < 2.5  to the left,  improve=0.5320377, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 2.5  to the left,  agree=0.79, adj=0.238, (0 split)
+
+Node number 11: 40 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.275  P(node) =0.004658204
+    class counts:    29    11
+   probabilities: 0.725 0.275 
+  left son=22 (7 obs) right son=23 (33 obs)
+  Primary splits:
+      kessler_k6_main.sw6 < 3.5  to the left,  improve=1.2833330, (0 missing)
+      SDQ_conduct.sw6     < 5.5  to the left,  improve=0.9926065, (0 missing)
+      feel_restless.sw6   splits as  LRL,      improve=0.9926065, (0 missing)
+      SDQ_emot_s.sw6      < 7.5  to the right, improve=0.9633333, (0 missing)
+      SDQ_prosoc.sw6      < 5.5  to the left,  improve=0.8166667, (0 missing)
+  Surrogate splits:
+      SDQ_prosoc.sw6 < 4.5  to the left,  agree=0.85, adj=0.143, (0 split)
+
+Node number 12: 478 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.1380753  P(node) =0.05566554
+    class counts:   412    66
+   probabilities: 0.862 0.138 
+  left son=24 (132 obs) right son=25 (346 obs)
+  Primary splits:
+      sex_CM.sw6           splits as  LR,       improve=3.1287620, (0 missing)
+      kessler_k6_main.sw6  < 13.5 to the left,  improve=2.7963910, (0 missing)
+      feel_no_good.sw6     splits as  LRR,      improve=0.9353812, (0 missing)
+      feel_hatred.sw6      splits as  LRR,      improve=0.8813616, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=0.6354097, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6 < 5.5  to the right, agree=0.73, adj=0.023, (0 split)
+
+Node number 13: 126 observations,    complexity param=0.003484321
+  predicted class=0  expected loss=0.3015873  P(node) =0.01467334
+    class counts:    88    38
+   probabilities: 0.698 0.302 
+  left son=26 (104 obs) right son=27 (22 obs)
+  Primary splits:
+      kessler_k6_main.sw6       < 0.5  to the right, improve=3.170274, (0 missing)
+      activitiy_status_main.sw6 < 1.5  to the left,  improve=2.659928, (0 missing)
+      cyberbull.sw6             < 2.5  to the right, improve=1.934537, (0 missing)
+      SDQ_prosoc.sw6            < 1.5  to the left,  improve=1.793607, (0 missing)
+      feel_good_others.sw6      splits as  LRR,      improve=1.553941, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 0.5  to the right, agree=0.833, adj=0.045, (0 split)
+
+Node number 14: 359 observations,    complexity param=0.006968641
+  predicted class=0  expected loss=0.2980501  P(node) =0.04180738
+    class counts:   252   107
+   probabilities: 0.702 0.298 
+  left son=28 (265 obs) right son=29 (94 obs)
+  Primary splits:
+      SDQ_peer.sw6        < 3.5  to the right, improve=4.858699, (0 missing)
+      SDQ_emot_s.sw6      < 3.5  to the left,  improve=3.538488, (0 missing)
+      kessler_k6_main.sw6 < 6.5  to the left,  improve=1.918790, (0 missing)
+      SDQ_prosoc.sw6      < 2.5  to the left,  improve=1.902611, (0 missing)
+      cyberbull.sw6       < 3.5  to the right, improve=1.836590, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 10.5 to the right, agree=0.747, adj=0.032, (0 split)
+
+Node number 15: 167 observations,    complexity param=0.007839721
+  predicted class=0  expected loss=0.497006  P(node) =0.019448
+    class counts:    84    83
+   probabilities: 0.503 0.497 
+  left son=30 (113 obs) right son=31 (54 obs)
+  Primary splits:
+      activitiy_status_main.sw6 < 3.5  to the left,  improve=4.594351, (0 missing)
+      SDQ_emot_s.sw6            < 7.5  to the left,  improve=4.084841, (0 missing)
+      feel_good_others.sw6      splits as  LRR,      improve=3.390218, (0 missing)
+      feel_wrong.sw6            splits as  LLR,      improve=3.181741, (0 missing)
+      SDQ_diff.sw6              < 16.5 to the left,  improve=2.899804, (0 missing)
+  Surrogate splits:
+      SDQ_conduct.sw6     < 6.5  to the left,  agree=0.701, adj=0.074, (0 split)
+      kessler_k6_main.sw6 < 18.5 to the left,  agree=0.701, adj=0.074, (0 split)
+      SDQ_diff.sw6        < 21.5 to the left,  agree=0.695, adj=0.056, (0 split)
+      SDQ_emot_s.sw6      < 8.5  to the left,  agree=0.695, adj=0.056, (0 split)
+      SDQ_prosoc.sw6      < 7.5  to the left,  agree=0.683, adj=0.019, (0 split)
+
+Node number 20: 361 observations
+  predicted class=0  expected loss=0.02493075  P(node) =0.04204029
+    class counts:   352     9
+   probabilities: 0.975 0.025 
+
+Node number 21: 946 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.07082452  P(node) =0.1101665
+    class counts:   879    67
+   probabilities: 0.929 0.071 
+  left son=42 (599 obs) right son=43 (347 obs)
+  Primary splits:
+      feel_not_concent.sw6 splits as  RLR,      improve=0.6459371, (0 missing)
+      feel_hatred.sw6      splits as  LLR,      improve=0.5985706, (0 missing)
+      SDQ_conduct.sw6      < 2.5  to the left,  improve=0.4986315, (0 missing)
+      kessler_k6_main.sw6  < 4.5  to the left,  improve=0.4969346, (0 missing)
+      cyberbull.sw6        < 5.5  to the right, improve=0.4326225, (0 missing)
+  Surrogate splits:
+      feel_no_good.sw6   splits as  -LR, agree=0.674, adj=0.112, (0 split)
+      feel_restless.sw6  splits as  LLR, agree=0.664, adj=0.084, (0 split)
+      feel_wrong.sw6     splits as  LLR, agree=0.658, adj=0.066, (0 split)
+      feel_not_enjoy.sw6 splits as  LLR, agree=0.650, adj=0.046, (0 split)
+      feel_hatred.sw6    splits as  LLR, agree=0.642, adj=0.023, (0 split)
+
+Node number 22: 7 observations
+  predicted class=0  expected loss=0  P(node) =0.0008151857
+    class counts:     7     0
+   probabilities: 1.000 0.000 
+
+Node number 23: 33 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.3333333  P(node) =0.003843019
+    class counts:    22    11
+   probabilities: 0.667 0.333 
+  left son=46 (13 obs) right son=47 (20 obs)
+  Primary splits:
+      SDQ_emot_s.sw6    < 7.5  to the right, improve=1.3820510, (0 missing)
+      feel_restless.sw6 splits as  LRL,      improve=1.3210780, (0 missing)
+      SDQ_conduct.sw6   < 7.5  to the right, improve=0.9166667, (0 missing)
+      SDQ_prosoc.sw6    < 5.5  to the left,  improve=0.6446886, (0 missing)
+      SDQ_peer.sw6      < 7.5  to the left,  improve=0.4512821, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6         < 7.5  to the left,  agree=0.758, adj=0.385, (0 split)
+      SDQ_conduct.sw6      < 3.5  to the left,  agree=0.697, adj=0.231, (0 split)
+      SDQ_diff.sw6         < 29.5 to the right, agree=0.667, adj=0.154, (0 split)
+      kessler_k6_main.sw6  < 13.5 to the right, agree=0.667, adj=0.154, (0 split)
+      feel_not_concent.sw6 splits as  LRR,      agree=0.636, adj=0.077, (0 split)
+
+Node number 24: 132 observations
+  predicted class=0  expected loss=0.04545455  P(node) =0.01537207
+    class counts:   126     6
+   probabilities: 0.955 0.045 
+
+Node number 25: 346 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.1734104  P(node) =0.04029347
+    class counts:   286    60
+   probabilities: 0.827 0.173 
+  left son=50 (335 obs) right son=51 (11 obs)
+  Primary splits:
+      kessler_k6_main.sw6 < 13.5 to the left,  improve=1.7959070, (0 missing)
+      feel_restless.sw6   splits as  RRL,      improve=1.1787910, (0 missing)
+      SDQ_peer.sw6        < 2.5  to the left,  improve=1.0825690, (0 missing)
+      SDQ_emot_s.sw6      < 1.5  to the right, improve=0.8990211, (0 missing)
+      SDQ_diff.sw6        < 1.5  to the left,  improve=0.8675030, (0 missing)
+
+Node number 26: 104 observations,    complexity param=0.003484321
+  predicted class=0  expected loss=0.25  P(node) =0.01211133
+    class counts:    78    26
+   probabilities: 0.750 0.250 
+  left son=52 (73 obs) right son=53 (31 obs)
+  Primary splits:
+      activitiy_status_main.sw6 < 1.5  to the left,  improve=3.590367, (0 missing)
+      SDQ_emot_s.sw6            < 1.5  to the left,  improve=1.736219, (0 missing)
+      SDQ_prosoc.sw6            < 1.5  to the left,  improve=1.660186, (0 missing)
+      SDQ_peer.sw6              < 0.5  to the right, improve=1.256410, (0 missing)
+      feel_not_enjoy.sw6        splits as  LRR,      improve=1.178277, (0 missing)
+  Surrogate splits:
+      kessler_k6_main.sw6 < 10.5 to the left,  agree=0.731, adj=0.097, (0 split)
+
+Node number 27: 22 observations,    complexity param=0.003484321
+  predicted class=1  expected loss=0.4545455  P(node) =0.002562012
+    class counts:    10    12
+   probabilities: 0.455 0.545 
+  left son=54 (16 obs) right son=55 (6 obs)
+  Primary splits:
+      cyberbull.sw6        < 4.5  to the right, improve=3.4090910, (0 missing)
+      SDQ_emot_s.sw6       < 2.5  to the right, improve=1.5443850, (0 missing)
+      SDQ_peer.sw6         < 0.5  to the left,  improve=0.7424242, (0 missing)
+      SDQ_prosoc.sw6       < 0.5  to the left,  improve=0.3108003, (0 missing)
+      feel_not_concent.sw6 splits as  -LR,      improve=0.3108003, (0 missing)
+  Surrogate splits:
+      SDQ_conduct.sw6           < 1.5  to the left,  agree=0.773, adj=0.167, (0 split)
+      SDQ_prosoc.sw6            < 2.5  to the left,  agree=0.773, adj=0.167, (0 split)
+      activitiy_status_main.sw6 < 1.5  to the left,  agree=0.773, adj=0.167, (0 split)
+
+Node number 28: 265 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.2490566  P(node) =0.0308606
+    class counts:   199    66
+   probabilities: 0.751 0.249 
+  left son=56 (47 obs) right son=57 (218 obs)
+  Primary splits:
+      SDQ_diff.sw6        < 11.5 to the left,  improve=3.920351, (0 missing)
+      cigarette_freq.sw6  < 1.5  to the left,  improve=2.815413, (0 missing)
+      SDQ_conduct.sw6     < 2.5  to the left,  improve=2.446774, (0 missing)
+      SDQ_emot_s.sw6      < 3.5  to the left,  improve=2.168562, (0 missing)
+      kessler_k6_main.sw6 < 6.5  to the left,  improve=2.133162, (0 missing)
+  Surrogate splits:
+      activitiy_status_main.sw6 < 7.5  to the right, agree=0.826, adj=0.021, (0 split)
+
+Node number 29: 94 observations,    complexity param=0.006968641
+  predicted class=0  expected loss=0.4361702  P(node) =0.01094678
+    class counts:    53    41
+   probabilities: 0.564 0.436 
+  left son=58 (62 obs) right son=59 (32 obs)
+  Primary splits:
+      SDQ_emot_s.sw6     < 5.5  to the left,  improve=2.409446, (0 missing)
+      cyberbull.sw6      < 3.5  to the right, improve=2.365622, (0 missing)
+      feel_restless.sw6  splits as  RLL,      improve=2.298328, (0 missing)
+      feel_hatred.sw6    splits as  LLR,      improve=1.405471, (0 missing)
+      feel_not_enjoy.sw6 splits as  LLR,      improve=1.398087, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6        < 12.5 to the left,  agree=0.777, adj=0.344, (0 split)
+      kessler_k6_main.sw6 < 9.5  to the left,  agree=0.702, adj=0.125, (0 split)
+      SDQ_prosoc.sw6      < 7    to the left,  agree=0.702, adj=0.125, (0 split)
+
+Node number 30: 113 observations,    complexity param=0.007839721
+  predicted class=0  expected loss=0.4159292  P(node) =0.01315943
+    class counts:    66    47
+   probabilities: 0.584 0.416 
+  left son=60 (98 obs) right son=61 (15 obs)
+  Primary splits:
+      SDQ_emot_s.sw6      < 7.5  to the left,  improve=5.102655, (0 missing)
+      SDQ_diff.sw6        < 24   to the left,  improve=2.905350, (0 missing)
+      kessler_k6_main.sw6 < 16.5 to the left,  improve=2.905350, (0 missing)
+      cigarette_freq.sw6  < 2.5  to the left,  improve=2.767715, (0 missing)
+      SDQ_prosoc.sw6      < 6.5  to the left,  improve=2.207951, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6   < 25.5 to the left,  agree=0.903, adj=0.267, (0 split)
+      SDQ_prosoc.sw6 < 6.5  to the left,  agree=0.885, adj=0.133, (0 split)
+      SDQ_peer.sw6   < 0.5  to the right, agree=0.876, adj=0.067, (0 split)
+
+Node number 31: 54 observations,    complexity param=0.00261324
+  predicted class=1  expected loss=0.3333333  P(node) =0.006288576
+    class counts:    18    36
+   probabilities: 0.333 0.667 
+  left son=62 (37 obs) right son=63 (17 obs)
+  Primary splits:
+      feel_not_enjoy.sw6   splits as  LLR,      improve=2.308426, (0 missing)
+      feel_not_concent.sw6 splits as  RLR,      improve=2.142857, (0 missing)
+      kessler_k6_main.sw6  < 18.5 to the right, improve=1.500000, (0 missing)
+      feel_wrong.sw6       splits as  LLR,      improve=1.154887, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=1.066667, (0 missing)
+  Surrogate splits:
+      cigarette_freq.sw6  < 3.5  to the left,  agree=0.796, adj=0.353, (0 split)
+      feel_restless.sw6   splits as  LLR,      agree=0.741, adj=0.176, (0 split)
+      SDQ_diff.sw6        < 20.5 to the left,  agree=0.722, adj=0.118, (0 split)
+      SDQ_peer.sw6        < 8.5  to the left,  agree=0.722, adj=0.118, (0 split)
+      kessler_k6_main.sw6 < 2.5  to the right, agree=0.704, adj=0.059, (0 split)
+
+Node number 42: 599 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.05676127  P(node) =0.06975661
+    class counts:   565    34
+   probabilities: 0.943 0.057 
+  left son=84 (390 obs) right son=85 (209 obs)
+  Primary splits:
+      kessler_k6_main.sw6 < 5.5  to the left,  improve=1.2269960, (0 missing)
+      SDQ_conduct.sw6     < 0.5  to the left,  improve=0.5955434, (0 missing)
+      feel_hatred.sw6     splits as  LLR,      improve=0.4363357, (0 missing)
+      cigarette_freq.sw6  < 5.5  to the left,  improve=0.4173135, (0 missing)
+      feel_restless.sw6   splits as  LRR,      improve=0.4007394, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6            < 5.5  to the left,  agree=0.668, adj=0.048, (0 split)
+      SDQ_diff.sw6              < 14.5 to the left,  agree=0.666, adj=0.043, (0 split)
+      activitiy_status_main.sw6 < 2.5  to the left,  agree=0.664, adj=0.038, (0 split)
+      SDQ_conduct.sw6           < 5.5  to the left,  agree=0.656, adj=0.014, (0 split)
+      SDQ_prosoc.sw6            < 7.5  to the left,  agree=0.656, adj=0.014, (0 split)
+
+Node number 43: 347 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.09510086  P(node) =0.04040992
+    class counts:   314    33
+   probabilities: 0.905 0.095 
+  left son=86 (211 obs) right son=87 (136 obs)
+  Primary splits:
+      cyberbull.sw6             < 5.5  to the right, improve=0.6207502, (0 missing)
+      activitiy_status_main.sw6 < 5    to the left,  improve=0.5520391, (0 missing)
+      SDQ_conduct.sw6           < 2.5  to the left,  improve=0.5345109, (0 missing)
+      feel_wrong.sw6            splits as  LLR,      improve=0.5187705, (0 missing)
+      SDQ_peer.sw6              < 7.5  to the right, improve=0.4248814, (0 missing)
+  Surrogate splits:
+      feel_wrong.sw6      splits as  LLR,      agree=0.620, adj=0.029, (0 split)
+      kessler_k6_main.sw6 < 1.5  to the right, agree=0.617, adj=0.022, (0 split)
+      cigarette_freq.sw6  < 5.5  to the left,  agree=0.617, adj=0.022, (0 split)
+
+Node number 46: 13 observations
+  predicted class=0  expected loss=0.1538462  P(node) =0.001513916
+    class counts:    11     2
+   probabilities: 0.846 0.154 
+
+Node number 47: 20 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.45  P(node) =0.002329102
+    class counts:    11     9
+   probabilities: 0.550 0.450 
+  left son=94 (15 obs) right son=95 (5 obs)
+  Primary splits:
+      feel_hatred.sw6   splits as  RLL,      improve=1.6333330, (0 missing)
+      SDQ_peer.sw6      < 9.5  to the right, improve=1.5363640, (0 missing)
+      SDQ_conduct.sw6   < 6.5  to the right, improve=0.9000000, (0 missing)
+      feel_restless.sw6 splits as  LRL,      improve=0.9000000, (0 missing)
+      SDQ_prosoc.sw6    < 5.5  to the left,  improve=0.8333333, (0 missing)
+  Surrogate splits:
+      feel_good_others.sw6 splits as  RLL,      agree=0.9, adj=0.6, (0 split)
+      SDQ_peer.sw6         < 6.5  to the right, agree=0.8, adj=0.2, (0 split)
+      feel_not_concent.sw6 splits as  RLL,      agree=0.8, adj=0.2, (0 split)
+      feel_wrong.sw6       splits as  RLL,      agree=0.8, adj=0.2, (0 split)
+
+Node number 50: 335 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.1641791  P(node) =0.03901246
+    class counts:   280    55
+   probabilities: 0.836 0.164 
+  left son=100 (227 obs) right son=101 (108 obs)
+  Primary splits:
+      kessler_k6_main.sw6 < 1.5  to the right, improve=1.0739260, (0 missing)
+      SDQ_emot_s.sw6      < 1.5  to the right, improve=0.9122916, (0 missing)
+      feel_restless.sw6   splits as  RRL,      improve=0.8794511, (0 missing)
+      cigarette_freq.sw6  < 3.5  to the right, improve=0.8332017, (0 missing)
+      SDQ_peer.sw6        < 2.5  to the left,  improve=0.8291874, (0 missing)
+
+Node number 51: 11 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.4545455  P(node) =0.001281006
+    class counts:     6     5
+   probabilities: 0.545 0.455 
+  left son=102 (5 obs) right son=103 (6 obs)
+  Primary splits:
+      feel_restless.sw6    splits as  LRL,      improve=1.18787900, (0 missing)
+      SDQ_diff.sw6         < 5    to the left,  improve=0.38787880, (0 missing)
+      SDQ_emot_s.sw6       < 0.5  to the left,  improve=0.05454545, (0 missing)
+      kessler_k6_main.sw6  < 16.5 to the left,  improve=0.05454545, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=0.05454545, (0 missing)
+  Surrogate splits:
+      activitiy_status_main.sw6 < 5.5  to the right, agree=0.909, adj=0.8, (0 split)
+      SDQ_diff.sw6              < 3.5  to the left,  agree=0.727, adj=0.4, (0 split)
+      SDQ_emot_s.sw6            < 2.5  to the left,  agree=0.727, adj=0.4, (0 split)
+      kessler_k6_main.sw6       < 16.5 to the right, agree=0.727, adj=0.4, (0 split)
+      cyberbull.sw6             < 4.5  to the left,  agree=0.727, adj=0.4, (0 split)
+
+Node number 52: 73 observations
+  predicted class=0  expected loss=0.1643836  P(node) =0.008501223
+    class counts:    61    12
+   probabilities: 0.836 0.164 
+
+Node number 53: 31 observations,    complexity param=0.003484321
+  predicted class=0  expected loss=0.4516129  P(node) =0.003610108
+    class counts:    17    14
+   probabilities: 0.548 0.452 
+  left son=106 (24 obs) right son=107 (7 obs)
+  Primary splits:
+      SDQ_peer.sw6        < 0.5  to the right, improve=2.9738860, (0 missing)
+      feel_restless.sw6   splits as  RLL,      improve=1.4471460, (0 missing)
+      kessler_k6_main.sw6 < 2.5  to the left,  improve=1.2081720, (0 missing)
+      cigarette_freq.sw6  < 1.5  to the right, improve=1.2081720, (0 missing)
+      sex_CM.sw6          splits as  LR,       improve=0.7548387, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 3.5  to the right, agree=0.839, adj=0.286, (0 split)
+
+Node number 54: 16 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.375  P(node) =0.001863282
+    class counts:    10     6
+   probabilities: 0.625 0.375 
+  left son=108 (9 obs) right son=109 (7 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 0.5  to the right, improve=0.9603175, (0 missing)
+      feel_good_others.sw6 splits as  -RL,      improve=0.7363636, (0 missing)
+      feel_not_enjoy.sw6   splits as  LRL,      improve=0.4454545, (0 missing)
+      SDQ_diff.sw6         < 3.5  to the right, improve=0.3000000, (0 missing)
+      feel_not_concent.sw6 splits as  -RL,      improve=0.1984127, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6       < 3.5  to the right, agree=0.938, adj=0.857, (0 split)
+      SDQ_peer.sw6       < 1.5  to the right, agree=0.750, adj=0.429, (0 split)
+      cyberbull.sw6      < 5.5  to the left,  agree=0.750, adj=0.429, (0 split)
+      feel_not_enjoy.sw6 splits as  LRL,      agree=0.750, adj=0.429, (0 split)
+      SDQ_prosoc.sw6     < 0.5  to the right, agree=0.688, adj=0.286, (0 split)
+
+Node number 55: 6 observations
+  predicted class=1  expected loss=0  P(node) =0.0006987306
+    class counts:     0     6
+   probabilities: 0.000 1.000 
+
+Node number 56: 47 observations
+  predicted class=0  expected loss=0.06382979  P(node) =0.00547339
+    class counts:    44     3
+   probabilities: 0.936 0.064 
+
+Node number 57: 218 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.2889908  P(node) =0.02538721
+    class counts:   155    63
+   probabilities: 0.711 0.289 
+  left son=114 (79 obs) right son=115 (139 obs)
+  Primary splits:
+      SDQ_conduct.sw6      < 2.5  to the left,  improve=1.852341, (0 missing)
+      cigarette_freq.sw6   < 1.5  to the left,  improve=1.799142, (0 missing)
+      SDQ_diff.sw6         < 16.5 to the left,  improve=1.299707, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=1.139228, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=0.995236, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 13.5 to the left,  agree=0.716, adj=0.215, (0 split)
+
+Node number 58: 62 observations,    complexity param=0.006968641
+  predicted class=0  expected loss=0.3548387  P(node) =0.007220217
+    class counts:    40    22
+   probabilities: 0.645 0.355 
+  left son=116 (54 obs) right son=117 (8 obs)
+  Primary splits:
+      feel_hatred.sw6      splits as  LLR,      improve=2.868578, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=2.787097, (0 missing)
+      feel_not_concent.sw6 splits as  RLR,      improve=1.437097, (0 missing)
+      SDQ_diff.sw6         < 10.5 to the right, improve=1.113964, (0 missing)
+      SDQ_emot_s.sw6       < 2.5  to the right, improve=1.109232, (0 missing)
+
+Node number 59: 32 observations,    complexity param=0.006968641
+  predicted class=1  expected loss=0.40625  P(node) =0.003726563
+    class counts:    13    19
+   probabilities: 0.406 0.594 
+  left son=118 (8 obs) right son=119 (24 obs)
+  Primary splits:
+      SDQ_conduct.sw6           < 1.5  to the left,  improve=4.687500, (0 missing)
+      cyberbull.sw6             < 4.5  to the right, improve=3.333604, (0 missing)
+      SDQ_diff.sw6              < 13.5 to the left,  improve=1.775162, (0 missing)
+      feel_restless.sw6         splits as  RLR,      improve=1.688582, (0 missing)
+      activitiy_status_main.sw6 < 4.5  to the left,  improve=1.687500, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 12.5 to the left,  agree=0.844, adj=0.375, (0 split)
+
+Node number 60: 98 observations,    complexity param=0.006097561
+  predicted class=0  expected loss=0.3571429  P(node) =0.0114126
+    class counts:    63    35
+   probabilities: 0.643 0.357 
+  left son=120 (17 obs) right son=121 (81 obs)
+  Primary splits:
+      cyberbull.sw6       < 2.5  to the left,  improve=3.660857, (0 missing)
+      SDQ_prosoc.sw6      < 3.5  to the right, improve=2.382353, (0 missing)
+      kessler_k6_main.sw6 < 16.5 to the left,  improve=2.066667, (0 missing)
+      cigarette_freq.sw6  < 2.5  to the left,  improve=1.780274, (0 missing)
+      feel_restless.sw6   splits as  LRR,      improve=1.199750, (0 missing)
+  Surrogate splits:
+      activitiy_status_main.sw6 < 2.5  to the right, agree=0.837, adj=0.059, (0 split)
+
+Node number 61: 15 observations
+  predicted class=1  expected loss=0.2  P(node) =0.001746827
+    class counts:     3    12
+   probabilities: 0.200 0.800 
+
+Node number 62: 37 observations,    complexity param=0.00261324
+  predicted class=1  expected loss=0.4324324  P(node) =0.004308839
+    class counts:    16    21
+   probabilities: 0.432 0.568 
+  left son=124 (15 obs) right son=125 (22 obs)
+  Primary splits:
+      SDQ_diff.sw6              < 18.5 to the right, improve=1.416708, (0 missing)
+      feel_good_others.sw6      splits as  LLR,      improve=1.371686, (0 missing)
+      feel_not_concent.sw6      splits as  -LR,      improve=1.341649, (0 missing)
+      activitiy_status_main.sw6 < 6.5  to the right, improve=1.182162, (0 missing)
+      SDQ_emot_s.sw6            < 2.5  to the right, improve=1.011625, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6    < 5.5  to the right, agree=0.865, adj=0.667, (0 split)
+      SDQ_conduct.sw6 < 2.5  to the right, agree=0.811, adj=0.533, (0 split)
+      SDQ_prosoc.sw6  < 4.5  to the right, agree=0.757, adj=0.400, (0 split)
+      cyberbull.sw6   < 4.5  to the left,  agree=0.757, adj=0.400, (0 split)
+      SDQ_emot_s.sw6  < 8.5  to the right, agree=0.730, adj=0.333, (0 split)
+
+Node number 63: 17 observations
+  predicted class=1  expected loss=0.1176471  P(node) =0.001979737
+    class counts:     2    15
+   probabilities: 0.118 0.882 
+
+Node number 84: 390 observations
+  predicted class=0  expected loss=0.03333333  P(node) =0.04541749
+    class counts:   377    13
+   probabilities: 0.967 0.033 
+
+Node number 85: 209 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.1004785  P(node) =0.02433912
+    class counts:   188    21
+   probabilities: 0.900 0.100 
+  left son=170 (43 obs) right son=171 (166 obs)
+  Primary splits:
+      feel_restless.sw6  splits as  LRR,      improve=1.0931570, (0 missing)
+      SDQ_diff.sw6       < 7.5  to the right, improve=0.8312251, (0 missing)
+      SDQ_peer.sw6       < 4.5  to the right, improve=0.7598313, (0 missing)
+      cigarette_freq.sw6 < 5.5  to the left,  improve=0.6698879, (0 missing)
+      cyberbull.sw6      < 5.5  to the right, improve=0.4745912, (0 missing)
+  Surrogate splits:
+      activitiy_status_main.sw6 < 7.5  to the right, agree=0.799, adj=0.023, (0 split)
+
+Node number 86: 211 observations
+  predicted class=0  expected loss=0.07109005  P(node) =0.02457203
+    class counts:   196    15
+   probabilities: 0.929 0.071 
+
+Node number 87: 136 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.1323529  P(node) =0.01583789
+    class counts:   118    18
+   probabilities: 0.868 0.132 
+  left son=174 (112 obs) right son=175 (24 obs)
+  Primary splits:
+      activitiy_status_main.sw6 < 5    to the left,  improve=1.4793420, (0 missing)
+      SDQ_peer.sw6              < 2.5  to the left,  improve=1.3845350, (0 missing)
+      SDQ_conduct.sw6           < 2.5  to the left,  improve=0.9607843, (0 missing)
+      SDQ_emot_s.sw6            < 5.5  to the left,  improve=0.6082969, (0 missing)
+      cigarette_freq.sw6        < 3.5  to the left,  improve=0.5070890, (0 missing)
+
+Node number 94: 15 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.3333333  P(node) =0.001746827
+    class counts:    10     5
+   probabilities: 0.667 0.333 
+  left son=188 (10 obs) right son=189 (5 obs)
+  Primary splits:
+      SDQ_peer.sw6              < 9.5  to the right, improve=1.0666670, (0 missing)
+      feel_not_concent.sw6      splits as  -LR,      improve=0.9523810, (0 missing)
+      feel_restless.sw6         splits as  LRL,      improve=0.5555556, (0 missing)
+      activitiy_status_main.sw6 < 3    to the right, improve=0.5555556, (0 missing)
+      sex_CM.sw6                splits as  LR,       improve=0.5555556, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6              < 25   to the right, agree=0.867, adj=0.6, (0 split)
+      SDQ_conduct.sw6           < 6.5  to the right, agree=0.867, adj=0.6, (0 split)
+      feel_not_enjoy.sw6        splits as  LLR,      agree=0.867, adj=0.6, (0 split)
+      activitiy_status_main.sw6 < 1.5  to the right, agree=0.867, adj=0.6, (0 split)
+      kessler_k6_main.sw6       < 16.5 to the left,  agree=0.800, adj=0.4, (0 split)
+
+Node number 95: 5 observations
+  predicted class=1  expected loss=0.2  P(node) =0.0005822755
+    class counts:     1     4
+   probabilities: 0.200 0.800 
+
+Node number 100: 227 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.1365639  P(node) =0.02643531
+    class counts:   196    31
+   probabilities: 0.863 0.137 
+  left son=200 (47 obs) right son=201 (180 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 0.5  to the left,  improve=1.0476970, (0 missing)
+      feel_no_good.sw6     splits as  LRR,      improve=0.6479494, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=0.5573298, (0 missing)
+      SDQ_conduct.sw6      < 1.5  to the left,  improve=0.4391813, (0 missing)
+      feel_not_enjoy.sw6   splits as  RLR,      improve=0.3951786, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 1.5  to the left,  agree=0.824, adj=0.149, (0 split)
+
+Node number 101: 108 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.2222222  P(node) =0.01257715
+    class counts:    84    24
+   probabilities: 0.778 0.222 
+  left son=202 (81 obs) right son=203 (27 obs)
+  Primary splits:
+      cigarette_freq.sw6 < 1.5  to the left,  improve=3.555556, (0 missing)
+      SDQ_peer.sw6       < 2.5  to the left,  improve=1.440476, (0 missing)
+      SDQ_emot_s.sw6     < 1.5  to the right, improve=1.333333, (0 missing)
+      SDQ_conduct.sw6    < 0.5  to the left,  improve=1.262770, (0 missing)
+      SDQ_diff.sw6       < 6.5  to the right, improve=1.190476, (0 missing)
+  Surrogate splits:
+      SDQ_conduct.sw6 < 3.5  to the left,  agree=0.769, adj=0.074, (0 split)
+      SDQ_diff.sw6    < 0.5  to the right, agree=0.759, adj=0.037, (0 split)
+
+Node number 102: 5 observations
+  predicted class=0  expected loss=0.2  P(node) =0.0005822755
+    class counts:     4     1
+   probabilities: 0.800 0.200 
+
+Node number 103: 6 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.0006987306
+    class counts:     2     4
+   probabilities: 0.333 0.667 
+
+Node number 106: 24 observations,    complexity param=0.003484321
+  predicted class=0  expected loss=0.3333333  P(node) =0.002794923
+    class counts:    16     8
+   probabilities: 0.667 0.333 
+  left son=212 (19 obs) right son=213 (5 obs)
+  Primary splits:
+      feel_restless.sw6    splits as  RLL,      improve=2.7508770, (0 missing)
+      kessler_k6_main.sw6  < 2.5  to the left,  improve=1.4035090, (0 missing)
+      SDQ_prosoc.sw6       < 0.5  to the right, improve=1.1204480, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=0.9523810, (0 missing)
+      cyberbull.sw6        < 4.5  to the right, improve=0.6666667, (0 missing)
+
+Node number 107: 7 observations
+  predicted class=1  expected loss=0.1428571  P(node) =0.0008151857
+    class counts:     1     6
+   probabilities: 0.143 0.857 
+
+Node number 108: 9 observations
+  predicted class=0  expected loss=0.2222222  P(node) =0.001048096
+    class counts:     7     2
+   probabilities: 0.778 0.222 
+
+Node number 109: 7 observations
+  predicted class=1  expected loss=0.4285714  P(node) =0.0008151857
+    class counts:     3     4
+   probabilities: 0.429 0.571 
+
+Node number 114: 79 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.2025316  P(node) =0.009199953
+    class counts:    63    16
+   probabilities: 0.797 0.203 
+  left son=228 (59 obs) right son=229 (20 obs)
+  Primary splits:
+      SDQ_peer.sw6         < 4.5  to the right, improve=2.088479, (0 missing)
+      feel_not_enjoy.sw6   splits as  LRL,      improve=1.878423, (0 missing)
+      feel_not_concent.sw6 splits as  RLL,      improve=1.738768, (0 missing)
+      kessler_k6_main.sw6  < 0.5  to the right, improve=1.149124, (0 missing)
+      SDQ_prosoc.sw6       < 5.5  to the right, improve=1.048399, (0 missing)
+
+Node number 115: 139 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.3381295  P(node) =0.01618726
+    class counts:    92    47
+   probabilities: 0.662 0.338 
+  left son=230 (68 obs) right son=231 (71 obs)
+  Primary splits:
+      feel_hatred.sw6      splits as  LRL,      improve=2.067940, (0 missing)
+      cyberbull.sw6        < 1.5  to the left,  improve=1.941018, (0 missing)
+      feel_not_concent.sw6 splits as  LRL,      improve=1.271671, (0 missing)
+      kessler_k6_main.sw6  < 1.5  to the left,  improve=1.215827, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=1.000038, (0 missing)
+  Surrogate splits:
+      feel_no_good.sw6     splits as  LR-, agree=0.698, adj=0.382, (0 split)
+      feel_good_others.sw6 splits as  LRL, agree=0.676, adj=0.338, (0 split)
+      feel_wrong.sw6       splits as  LRL, agree=0.626, adj=0.235, (0 split)
+      feel_not_concent.sw6 splits as  LRR, agree=0.597, adj=0.176, (0 split)
+      feel_not_enjoy.sw6   splits as  LRL, agree=0.590, adj=0.162, (0 split)
+
+Node number 116: 54 observations,    complexity param=0.00261324
+  predicted class=0  expected loss=0.2962963  P(node) =0.006288576
+    class counts:    38    16
+   probabilities: 0.704 0.296 
+  left son=232 (31 obs) right son=233 (23 obs)
+  Primary splits:
+      feel_restless.sw6    splits as  RLR,      improve=2.653161, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=2.370370, (0 missing)
+      feel_not_concent.sw6 splits as  RLR,      improve=1.844834, (0 missing)
+      SDQ_emot_s.sw6       < 4.5  to the right, improve=1.334308, (0 missing)
+      feel_no_good.sw6     splits as  RL-,      improve=1.185185, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  RL-,      agree=0.704, adj=0.304, (0 split)
+      SDQ_conduct.sw6      < 1.5  to the right, agree=0.667, adj=0.217, (0 split)
+      SDQ_prosoc.sw6       < 1.5  to the right, agree=0.667, adj=0.217, (0 split)
+      SDQ_diff.sw6         < 10.5 to the right, agree=0.648, adj=0.174, (0 split)
+      feel_good_others.sw6 splits as  RLL,      agree=0.648, adj=0.174, (0 split)
+
+Node number 117: 8 observations
+  predicted class=1  expected loss=0.25  P(node) =0.0009316409
+    class counts:     2     6
+   probabilities: 0.250 0.750 
+
+Node number 118: 8 observations
+  predicted class=0  expected loss=0.125  P(node) =0.0009316409
+    class counts:     7     1
+   probabilities: 0.875 0.125 
+
+Node number 119: 24 observations,    complexity param=0.00174216
+  predicted class=1  expected loss=0.25  P(node) =0.002794923
+    class counts:     6    18
+   probabilities: 0.250 0.750 
+  left son=238 (5 obs) right son=239 (19 obs)
+  Primary splits:
+      kessler_k6_main.sw6  < 2.5  to the left,  improve=1.5473680, (0 missing)
+      feel_hatred.sw6      splits as  LRL,      improve=1.0888890, (0 missing)
+      cyberbull.sw6        < 4.5  to the right, improve=0.7714286, (0 missing)
+      feel_restless.sw6    splits as  RLR,      improve=0.7714286, (0 missing)
+      feel_not_concent.sw6 splits as  LRL,      improve=0.7714286, (0 missing)
+
+Node number 120: 17 observations
+  predicted class=0  expected loss=0.05882353  P(node) =0.001979737
+    class counts:    16     1
+   probabilities: 0.941 0.059 
+
+Node number 121: 81 observations,    complexity param=0.006097561
+  predicted class=0  expected loss=0.4197531  P(node) =0.009432864
+    class counts:    47    34
+   probabilities: 0.580 0.420 
+  left son=242 (60 obs) right son=243 (21 obs)
+  Primary splits:
+      cyberbull.sw6      < 4.5  to the right, improve=3.456790, (0 missing)
+      SDQ_prosoc.sw6     < 3.5  to the right, improve=2.466224, (0 missing)
+      cigarette_freq.sw6 < 2.5  to the left,  improve=1.769579, (0 missing)
+      feel_restless.sw6  splits as  LRR,      improve=1.542407, (0 missing)
+      feel_wrong.sw6     splits as  LLR,      improve=1.216994, (0 missing)
+  Surrogate splits:
+      kessler_k6_main.sw6 < 17.5 to the left,  agree=0.765, adj=0.095, (0 split)
+      SDQ_emot_s.sw6      < 1.5  to the right, agree=0.753, adj=0.048, (0 split)
+
+Node number 124: 15 observations,    complexity param=0.00261324
+  predicted class=0  expected loss=0.4  P(node) =0.001746827
+    class counts:     9     6
+   probabilities: 0.600 0.400 
+  left son=248 (9 obs) right son=249 (6 obs)
+  Primary splits:
+      cyberbull.sw6       < 3.5  to the right, improve=1.422222, (0 missing)
+      SDQ_emot_s.sw6      < 8.5  to the left,  improve=1.422222, (0 missing)
+      SDQ_peer.sw6        < 6.5  to the left,  improve=1.088889, (0 missing)
+      kessler_k6_main.sw6 < 15.5 to the right, improve=1.088889, (0 missing)
+      feel_wrong.sw6      splits as  -LR,      improve=1.088889, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6       < 3.5  to the right, agree=0.733, adj=0.333, (0 split)
+      feel_good_others.sw6 splits as  LRL,      agree=0.733, adj=0.333, (0 split)
+      feel_restless.sw6    splits as  LRL,      agree=0.733, adj=0.333, (0 split)
+      SDQ_diff.sw6         < 25.5 to the left,  agree=0.667, adj=0.167, (0 split)
+      SDQ_conduct.sw6      < 6.5  to the left,  agree=0.667, adj=0.167, (0 split)
+
+Node number 125: 22 observations,    complexity param=0.00261324
+  predicted class=1  expected loss=0.3181818  P(node) =0.002562012
+    class counts:     7    15
+   probabilities: 0.318 0.682 
+  left son=250 (10 obs) right son=251 (12 obs)
+  Primary splits:
+      feel_not_concent.sw6      splits as  -LR,      improve=2.912121, (0 missing)
+      kessler_k6_main.sw6       < 8.5  to the left,  improve=2.545455, (0 missing)
+      activitiy_status_main.sw6 < 6.5  to the right, improve=2.078788, (0 missing)
+      SDQ_prosoc.sw6            < 4.5  to the left,  improve=1.310160, (0 missing)
+      feel_restless.sw6         splits as  RLL,      improve=1.310160, (0 missing)
+  Surrogate splits:
+      kessler_k6_main.sw6 < 7.5  to the left,  agree=0.818, adj=0.6, (0 split)
+      feel_wrong.sw6      splits as  LLR,      agree=0.818, adj=0.6, (0 split)
+      SDQ_conduct.sw6     < 1.5  to the right, agree=0.727, adj=0.4, (0 split)
+      feel_restless.sw6   splits as  RLR,      agree=0.727, adj=0.4, (0 split)
+      SDQ_diff.sw6        < 14   to the right, agree=0.682, adj=0.3, (0 split)
+
+Node number 170: 43 observations
+  predicted class=0  expected loss=0  P(node) =0.00500757
+    class counts:    43     0
+   probabilities: 1.000 0.000 
+
+Node number 171: 166 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.126506  P(node) =0.01933155
+    class counts:   145    21
+   probabilities: 0.873 0.127 
+  left son=342 (130 obs) right son=343 (36 obs)
+  Primary splits:
+      SDQ_diff.sw6        < 7.5  to the right, improve=1.4021320, (0 missing)
+      SDQ_peer.sw6        < 4.5  to the right, improve=1.0999550, (0 missing)
+      SDQ_prosoc.sw6      < 1.5  to the right, improve=0.7292209, (0 missing)
+      cigarette_freq.sw6  < 5.5  to the left,  improve=0.5325803, (0 missing)
+      kessler_k6_main.sw6 < 17.5 to the right, improve=0.4514529, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6    < 1.5  to the right, agree=0.831, adj=0.222, (0 split)
+      SDQ_conduct.sw6 < 0.5  to the right, agree=0.825, adj=0.194, (0 split)
+      SDQ_emot_s.sw6  < 0.5  to the right, agree=0.801, adj=0.083, (0 split)
+
+Node number 174: 112 observations
+  predicted class=0  expected loss=0.09821429  P(node) =0.01304297
+    class counts:   101    11
+   probabilities: 0.902 0.098 
+
+Node number 175: 24 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.2916667  P(node) =0.002794923
+    class counts:    17     7
+   probabilities: 0.708 0.292 
+  left son=350 (17 obs) right son=351 (7 obs)
+  Primary splits:
+      kessler_k6_main.sw6  < 4.5  to the right, improve=3.530112, (0 missing)
+      feel_restless.sw6    splits as  RLL,      improve=1.546919, (0 missing)
+      SDQ_emot_s.sw6       < 2.5  to the right, improve=1.488095, (0 missing)
+      SDQ_peer.sw6         < 5.5  to the right, improve=1.074561, (0 missing)
+      feel_not_concent.sw6 splits as  R-L,      improve=1.041667, (0 missing)
+  Surrogate splits:
+      feel_restless.sw6 splits as  RLL, agree=0.75, adj=0.143, (0 split)
+
+Node number 188: 10 observations
+  predicted class=0  expected loss=0.2  P(node) =0.001164551
+    class counts:     8     2
+   probabilities: 0.800 0.200 
+
+Node number 189: 5 observations
+  predicted class=1  expected loss=0.4  P(node) =0.0005822755
+    class counts:     2     3
+   probabilities: 0.400 0.600 
+
+Node number 200: 47 observations
+  predicted class=0  expected loss=0.04255319  P(node) =0.00547339
+    class counts:    45     2
+   probabilities: 0.957 0.043 
+
+Node number 201: 180 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.1611111  P(node) =0.02096192
+    class counts:   151    29
+   probabilities: 0.839 0.161 
+  left son=402 (44 obs) right son=403 (136 obs)
+  Primary splits:
+      feel_no_good.sw6     splits as  LRR,      improve=1.0058230, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=0.8387353, (0 missing)
+      SDQ_emot_s.sw6       < 1.5  to the right, improve=0.7088262, (0 missing)
+      SDQ_prosoc.sw6       < 2.5  to the right, improve=0.5555556, (0 missing)
+      feel_not_concent.sw6 splits as  LLR,      improve=0.4481481, (0 missing)
+  Surrogate splits:
+      feel_hatred.sw6      splits as  LRR, agree=0.806, adj=0.205, (0 split)
+      feel_not_concent.sw6 splits as  LRR, agree=0.800, adj=0.182, (0 split)
+
+Node number 202: 81 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.1481481  P(node) =0.009432864
+    class counts:    69    12
+   probabilities: 0.852 0.148 
+  left son=404 (64 obs) right son=405 (17 obs)
+  Primary splits:
+      SDQ_peer.sw6       < 2.5  to the left,  improve=1.8047390, (0 missing)
+      feel_not_enjoy.sw6 splits as  LRL,      improve=1.1262070, (0 missing)
+      SDQ_conduct.sw6    < 0.5  to the left,  improve=0.8900014, (0 missing)
+      SDQ_prosoc.sw6     < 1.5  to the right, improve=0.6370485, (0 missing)
+      SDQ_diff.sw6       < 1.5  to the left,  improve=0.6183575, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6 < 7.5  to the left,  agree=0.802, adj=0.059, (0 split)
+
+Node number 203: 27 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.4444444  P(node) =0.003144288
+    class counts:    15    12
+   probabilities: 0.556 0.444 
+  left son=406 (5 obs) right son=407 (22 obs)
+  Primary splits:
+      cigarette_freq.sw6 < 3.5  to the right, improve=2.4242420, (0 missing)
+      SDQ_prosoc.sw6     < 1.5  to the left,  improve=1.3761900, (0 missing)
+      SDQ_diff.sw6       < 5.5  to the right, improve=1.3333330, (0 missing)
+      SDQ_emot_s.sw6     < 1.5  to the right, improve=1.1904760, (0 missing)
+      feel_hatred.sw6    splits as  LRL,      improve=0.7686275, (0 missing)
+
+Node number 212: 19 observations
+  predicted class=0  expected loss=0.2105263  P(node) =0.002212647
+    class counts:    15     4
+   probabilities: 0.789 0.211 
+
+Node number 213: 5 observations
+  predicted class=1  expected loss=0.2  P(node) =0.0005822755
+    class counts:     1     4
+   probabilities: 0.200 0.800 
+
+Node number 228: 59 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.1355932  P(node) =0.006870851
+    class counts:    51     8
+   probabilities: 0.864 0.136 
+  left son=456 (41 obs) right son=457 (18 obs)
+  Primary splits:
+      cigarette_freq.sw6   < 1.5  to the left,  improve=1.0473110, (0 missing)
+      feel_not_enjoy.sw6   splits as  LRL,      improve=0.7471751, (0 missing)
+      SDQ_peer.sw6         < 7.5  to the left,  improve=0.6911145, (0 missing)
+      kessler_k6_main.sw6  < 8.5  to the left,  improve=0.5746945, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=0.5539127, (0 missing)
+  Surrogate splits:
+      cyberbull.sw6             < 3.5  to the right, agree=0.746, adj=0.167, (0 split)
+      SDQ_peer.sw6              < 8.5  to the left,  agree=0.729, adj=0.111, (0 split)
+      kessler_k6_main.sw6       < 13   to the left,  agree=0.729, adj=0.111, (0 split)
+      activitiy_status_main.sw6 < 3.5  to the left,  agree=0.712, adj=0.056, (0 split)
+
+Node number 229: 20 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.4  P(node) =0.002329102
+    class counts:    12     8
+   probabilities: 0.600 0.400 
+  left son=458 (13 obs) right son=459 (7 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 4.5  to the right, improve=2.127473, (0 missing)
+      SDQ_diff.sw6         < 14.5 to the right, improve=1.600000, (0 missing)
+      feel_hatred.sw6      splits as  RLL,      improve=1.219048, (0 missing)
+      feel_good_others.sw6 splits as  LRL,      improve=1.219048, (0 missing)
+      feel_not_concent.sw6 splits as  RLL,      improve=1.219048, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6        < 13.5 to the right, agree=0.85, adj=0.571, (0 split)
+      feel_hatred.sw6     splits as  RLL,      agree=0.75, adj=0.286, (0 split)
+      kessler_k6_main.sw6 < 0.5  to the right, agree=0.75, adj=0.286, (0 split)
+      feel_not_enjoy.sw6  splits as  LR-,      agree=0.70, adj=0.143, (0 split)
+      sex_CM.sw6          splits as  RL,       agree=0.70, adj=0.143, (0 split)
+
+Node number 230: 68 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.25  P(node) =0.007918947
+    class counts:    51    17
+   probabilities: 0.750 0.250 
+  left son=460 (9 obs) right son=461 (59 obs)
+  Primary splits:
+      SDQ_peer.sw6         < 4.5  to the left,  improve=1.296610, (0 missing)
+      SDQ_emot_s.sw6       < 8.5  to the left,  improve=1.133333, (0 missing)
+      kessler_k6_main.sw6  < 1.5  to the left,  improve=1.133333, (0 missing)
+      cigarette_freq.sw6   < 4.5  to the right, improve=1.133333, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=1.098086, (0 missing)
+
+Node number 231: 71 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.4225352  P(node) =0.008268313
+    class counts:    41    30
+   probabilities: 0.577 0.423 
+  left son=462 (5 obs) right son=463 (66 obs)
+  Primary splits:
+      cyberbull.sw6        < 1.5  to the left,  improve=1.920615, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=1.883602, (0 missing)
+      cigarette_freq.sw6   < 1.5  to the left,  improve=1.490495, (0 missing)
+      feel_not_enjoy.sw6   splits as  RLL,      improve=1.385206, (0 missing)
+      SDQ_peer.sw6         < 4.5  to the right, improve=1.190312, (0 missing)
+
+Node number 232: 31 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.1612903  P(node) =0.003610108
+    class counts:    26     5
+   probabilities: 0.839 0.161 
+  left son=464 (26 obs) right son=465 (5 obs)
+  Primary splits:
+      feel_not_concent.sw6 splits as  LLR,      improve=2.2947890, (0 missing)
+      SDQ_emot_s.sw6       < 3.5  to the left,  improve=1.0186760, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=0.9597463, (0 missing)
+      cyberbull.sw6        < 5.5  to the left,  improve=0.7904581, (0 missing)
+      SDQ_peer.sw6         < 1.5  to the right, improve=0.6794045, (0 missing)
+  Surrogate splits:
+      feel_not_enjoy.sw6 splits as  LLR, agree=0.871, adj=0.2, (0 split)
+
+Node number 233: 23 observations,    complexity param=0.00261324
+  predicted class=0  expected loss=0.4782609  P(node) =0.002678467
+    class counts:    12    11
+   probabilities: 0.522 0.478 
+  left son=466 (6 obs) right son=467 (17 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 4.5  to the right, improve=1.576300, (0 missing)
+      feel_not_concent.sw6 splits as  RLL,      improve=1.322705, (0 missing)
+      feel_no_good.sw6     splits as  RL-,      improve=1.054018, (0 missing)
+      kessler_k6_main.sw6  < 6.5  to the right, improve=0.989372, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=0.621118, (0 missing)
+  Surrogate splits:
+      feel_wrong.sw6 splits as  RRL,      agree=0.826, adj=0.333, (0 split)
+      SDQ_diff.sw6   < 12.5 to the right, agree=0.783, adj=0.167, (0 split)
+
+Node number 238: 5 observations
+  predicted class=0  expected loss=0.4  P(node) =0.0005822755
+    class counts:     3     2
+   probabilities: 0.600 0.400 
+
+Node number 239: 19 observations
+  predicted class=1  expected loss=0.1578947  P(node) =0.002212647
+    class counts:     3    16
+   probabilities: 0.158 0.842 
+
+Node number 242: 60 observations,    complexity param=0.005226481
+  predicted class=0  expected loss=0.3333333  P(node) =0.006987306
+    class counts:    40    20
+   probabilities: 0.667 0.333 
+  left son=484 (51 obs) right son=485 (9 obs)
+  Primary splits:
+      kessler_k6_main.sw6 < 12.5 to the left,  improve=2.352941, (0 missing)
+      feel_restless.sw6   splits as  LLR,      improve=2.222222, (0 missing)
+      SDQ_conduct.sw6     < 4.5  to the left,  improve=1.706667, (0 missing)
+      SDQ_peer.sw6        < 7.5  to the left,  improve=1.481481, (0 missing)
+      feel_not_enjoy.sw6  splits as  LRR,      improve=1.481481, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6       < 21.5 to the left,  agree=0.883, adj=0.222, (0 split)
+      cigarette_freq.sw6 < 5.5  to the left,  agree=0.883, adj=0.222, (0 split)
+      SDQ_conduct.sw6    < 5.5  to the left,  agree=0.867, adj=0.111, (0 split)
+
+Node number 243: 21 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.002445557
+    class counts:     7    14
+   probabilities: 0.333 0.667 
+
+Node number 248: 9 observations
+  predicted class=0  expected loss=0.2222222  P(node) =0.001048096
+    class counts:     7     2
+   probabilities: 0.778 0.222 
+
+Node number 249: 6 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.0006987306
+    class counts:     2     4
+   probabilities: 0.333 0.667 
+
+Node number 250: 10 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.4  P(node) =0.001164551
+    class counts:     6     4
+   probabilities: 0.600 0.400 
+  left son=500 (5 obs) right son=501 (5 obs)
+  Primary splits:
+      feel_wrong.sw6 splits as  LRL, improve=0.8, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6      < 2.5  to the right, agree=0.8, adj=0.6, (0 split)
+      SDQ_conduct.sw6     < 1.5  to the left,  agree=0.8, adj=0.6, (0 split)
+      feel_hatred.sw6     splits as  -RL,      agree=0.7, adj=0.4, (0 split)
+      SDQ_peer.sw6        < 2.5  to the left,  agree=0.7, adj=0.4, (0 split)
+      kessler_k6_main.sw6 < 3.5  to the right, agree=0.7, adj=0.4, (0 split)
+
+Node number 251: 12 observations
+  predicted class=1  expected loss=0.08333333  P(node) =0.001397461
+    class counts:     1    11
+   probabilities: 0.083 0.917 
+
+Node number 342: 130 observations
+  predicted class=0  expected loss=0.09230769  P(node) =0.01513916
+    class counts:   118    12
+   probabilities: 0.908 0.092 
+
+Node number 343: 36 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.25  P(node) =0.004192384
+    class counts:    27     9
+   probabilities: 0.750 0.250 
+  left son=686 (22 obs) right son=687 (14 obs)
+  Primary splits:
+      feel_hatred.sw6      splits as  LRR,      improve=1.4610390, (0 missing)
+      SDQ_conduct.sw6      < 0.5  to the left,  improve=1.4610390, (0 missing)
+      SDQ_diff.sw6         < 6.5  to the left,  improve=1.2857140, (0 missing)
+      feel_good_others.sw6 splits as  RLL,      improve=0.7374582, (0 missing)
+      kessler_k6_main.sw6  < 7.5  to the right, improve=0.5259740, (0 missing)
+  Surrogate splits:
+      kessler_k6_main.sw6 < 13   to the left,  agree=0.667, adj=0.143, (0 split)
+      SDQ_prosoc.sw6      < 1.5  to the right, agree=0.667, adj=0.143, (0 split)
+      feel_wrong.sw6      splits as  LLR,      agree=0.667, adj=0.143, (0 split)
+      SDQ_peer.sw6        < 1.5  to the left,  agree=0.639, adj=0.071, (0 split)
+      cyberbull.sw6       < 5.5  to the right, agree=0.639, adj=0.071, (0 split)
+
+Node number 350: 17 observations
+  predicted class=0  expected loss=0.1176471  P(node) =0.001979737
+    class counts:    15     2
+   probabilities: 0.882 0.118 
+
+Node number 351: 7 observations
+  predicted class=1  expected loss=0.2857143  P(node) =0.0008151857
+    class counts:     2     5
+   probabilities: 0.286 0.714 
+
+Node number 402: 44 observations
+  predicted class=0  expected loss=0.06818182  P(node) =0.005124025
+    class counts:    41     3
+   probabilities: 0.932 0.068 
+
+Node number 403: 136 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.1911765  P(node) =0.01583789
+    class counts:   110    26
+   probabilities: 0.809 0.191 
+  left son=806 (104 obs) right son=807 (32 obs)
+  Primary splits:
+      feel_restless.sw6    splits as  RLL,      improve=1.2319000, (0 missing)
+      feel_not_enjoy.sw6   splits as  RLR,      improve=1.0195910, (0 missing)
+      feel_not_concent.sw6 splits as  RLR,      improve=0.7416518, (0 missing)
+      feel_wrong.sw6       splits as  RL-,      improve=0.5254402, (0 missing)
+      SDQ_diff.sw6         < 6.5  to the right, improve=0.5069692, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6   < 4.5  to the left,  agree=0.779, adj=0.063, (0 split)
+      SDQ_prosoc.sw6 < 3.5  to the left,  agree=0.772, adj=0.031, (0 split)
+
+Node number 404: 64 observations
+  predicted class=0  expected loss=0.09375  P(node) =0.007453127
+    class counts:    58     6
+   probabilities: 0.906 0.094 
+
+Node number 405: 17 observations,    complexity param=0.002129307
+  predicted class=0  expected loss=0.3529412  P(node) =0.001979737
+    class counts:    11     6
+   probabilities: 0.647 0.353 
+  left son=810 (11 obs) right son=811 (6 obs)
+  Primary splits:
+      feel_not_enjoy.sw6 splits as  LRL,      improve=4.279857, (0 missing)
+      SDQ_diff.sw6       < 5.5  to the right, improve=1.825312, (0 missing)
+      SDQ_conduct.sw6    < 1.5  to the right, improve=1.764706, (0 missing)
+      cyberbull.sw6      < 5.5  to the right, improve=1.764706, (0 missing)
+      feel_no_good.sw6   splits as  LRR,      improve=1.136134, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6         < 5.5  to the right, agree=0.882, adj=0.667, (0 split)
+      feel_no_good.sw6     splits as  LRR,      agree=0.824, adj=0.500, (0 split)
+      feel_hatred.sw6      splits as  LR-,      agree=0.765, adj=0.333, (0 split)
+      feel_good_others.sw6 splits as  LLR,      agree=0.765, adj=0.333, (0 split)
+      cyberbull.sw6        < 3.5  to the right, agree=0.765, adj=0.333, (0 split)
+
+Node number 406: 5 observations
+  predicted class=0  expected loss=0  P(node) =0.0005822755
+    class counts:     5     0
+   probabilities: 1.000 0.000 
+
+Node number 407: 22 observations,    complexity param=0.002129307
+  predicted class=1  expected loss=0.4545455  P(node) =0.002562012
+    class counts:    10    12
+   probabilities: 0.455 0.545 
+  left son=814 (5 obs) right son=815 (17 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 1.5  to the right, improve=1.5443850, (0 missing)
+      SDQ_diff.sw6         < 5.5  to the right, improve=1.3852810, (0 missing)
+      feel_hatred.sw6      splits as  LRL,      improve=1.0519480, (0 missing)
+      SDQ_prosoc.sw6       < 0.5  to the left,  improve=0.8757576, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=0.8385027, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6    < 7    to the right, agree=0.864, adj=0.4, (0 split)
+      SDQ_conduct.sw6 < 2.5  to the right, agree=0.818, adj=0.2, (0 split)
+
+Node number 456: 41 observations
+  predicted class=0  expected loss=0.07317073  P(node) =0.004774659
+    class counts:    38     3
+   probabilities: 0.927 0.073 
+
+Node number 457: 18 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.2777778  P(node) =0.002096192
+    class counts:    13     5
+   probabilities: 0.722 0.278 
+  left son=914 (13 obs) right son=915 (5 obs)
+  Primary splits:
+      SDQ_peer.sw6        < 7.5  to the left,  improve=3.7760680, (0 missing)
+      feel_restless.sw6   splits as  RLL,      improve=1.4376070, (0 missing)
+      kessler_k6_main.sw6 < 8.5  to the left,  improve=0.8888889, (0 missing)
+      feel_not_enjoy.sw6  splits as  LRL,      improve=0.8888889, (0 missing)
+      SDQ_conduct.sw6     < 1.5  to the right, improve=0.5209235, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6         < 17.5 to the left,  agree=0.833, adj=0.4, (0 split)
+      feel_hatred.sw6      splits as  LLR,      agree=0.778, adj=0.2, (0 split)
+      SDQ_conduct.sw6      < 1.5  to the right, agree=0.778, adj=0.2, (0 split)
+      feel_not_concent.sw6 splits as  RLL,      agree=0.778, adj=0.2, (0 split)
+
+Node number 458: 13 observations
+  predicted class=0  expected loss=0.2307692  P(node) =0.001513916
+    class counts:    10     3
+   probabilities: 0.769 0.231 
+
+Node number 459: 7 observations
+  predicted class=1  expected loss=0.2857143  P(node) =0.0008151857
+    class counts:     2     5
+   probabilities: 0.286 0.714 
+
+Node number 460: 9 observations
+  predicted class=0  expected loss=0  P(node) =0.001048096
+    class counts:     9     0
+   probabilities: 1.000 0.000 
+
+Node number 461: 59 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.2881356  P(node) =0.006870851
+    class counts:    42    17
+   probabilities: 0.712 0.288 
+  left son=922 (7 obs) right son=923 (52 obs)
+  Primary splits:
+      cigarette_freq.sw6   < 5    to the right, improve=1.318774, (0 missing)
+      SDQ_emot_s.sw6       < 8.5  to the left,  improve=1.274818, (0 missing)
+      feel_not_enjoy.sw6   splits as  LRR,      improve=1.168828, (0 missing)
+      kessler_k6_main.sw6  < 1.5  to the left,  improve=1.109050, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=1.080941, (0 missing)
+  Surrogate splits:
+      cyberbull.sw6 < 1.5  to the left,  agree=0.898, adj=0.143, (0 split)
+
+Node number 462: 5 observations
+  predicted class=0  expected loss=0  P(node) =0.0005822755
+    class counts:     5     0
+   probabilities: 1.000 0.000 
+
+Node number 463: 66 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.4545455  P(node) =0.007686037
+    class counts:    36    30
+   probabilities: 0.545 0.455 
+  left son=926 (12 obs) right son=927 (54 obs)
+  Primary splits:
+      SDQ_peer.sw6         < 8.5  to the right, improve=1.2272730, (0 missing)
+      feel_not_enjoy.sw6   splits as  RLL,      improve=1.2272730, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=1.2272730, (0 missing)
+      SDQ_emot_s.sw6       < 3.5  to the left,  improve=1.0080420, (0 missing)
+      cigarette_freq.sw6   < 2.5  to the left,  improve=0.8647854, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6   < 29.5 to the right, agree=0.864, adj=0.25, (0 split)
+      SDQ_prosoc.sw6 < 8.5  to the right, agree=0.864, adj=0.25, (0 split)
+
+Node number 464: 26 observations
+  predicted class=0  expected loss=0.07692308  P(node) =0.003027833
+    class counts:    24     2
+   probabilities: 0.923 0.077 
+
+Node number 465: 5 observations
+  predicted class=1  expected loss=0.4  P(node) =0.0005822755
+    class counts:     2     3
+   probabilities: 0.400 0.600 
+
+Node number 466: 6 observations
+  predicted class=0  expected loss=0.1666667  P(node) =0.0006987306
+    class counts:     5     1
+   probabilities: 0.833 0.167 
+
+Node number 467: 17 observations,    complexity param=0.00261324
+  predicted class=1  expected loss=0.4117647  P(node) =0.001979737
+    class counts:     7    10
+   probabilities: 0.412 0.588 
+  left son=934 (10 obs) right son=935 (7 obs)
+  Primary splits:
+      SDQ_prosoc.sw6       < 3.5  to the left,  improve=1.7210080, (0 missing)
+      SDQ_conduct.sw6      < 2.5  to the right, improve=0.7908497, (0 missing)
+      feel_not_concent.sw6 splits as  RLL,      improve=0.6352941, (0 missing)
+      feel_good_others.sw6 splits as  RLR,      improve=0.6067227, (0 missing)
+      SDQ_diff.sw6         < 10.5 to the right, improve=0.2352941, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6         < 1.5  to the right, agree=0.706, adj=0.286, (0 split)
+      SDQ_conduct.sw6      < 0.5  to the right, agree=0.706, adj=0.286, (0 split)
+      feel_not_enjoy.sw6   splits as  LRL,      agree=0.706, adj=0.286, (0 split)
+      feel_not_concent.sw6 splits as  LRL,      agree=0.706, adj=0.286, (0 split)
+      SDQ_diff.sw6         < 11.5 to the left,  agree=0.647, adj=0.143, (0 split)
+
+Node number 484: 51 observations,    complexity param=0.0029036
+  predicted class=0  expected loss=0.2745098  P(node) =0.00593921
+    class counts:    37    14
+   probabilities: 0.725 0.275 
+  left son=968 (19 obs) right son=969 (32 obs)
+  Primary splits:
+      SDQ_prosoc.sw6      < 3.5  to the right, improve=1.7347780, (0 missing)
+      kessler_k6_main.sw6 < 5.5  to the right, improve=1.3623080, (0 missing)
+      feel_restless.sw6   splits as  LLR,      improve=1.2375350, (0 missing)
+      SDQ_diff.sw6        < 19.5 to the right, improve=1.0248370, (0 missing)
+      feel_not_enjoy.sw6  splits as  LRR,      improve=0.8354646, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6         < 14.5 to the right, agree=0.725, adj=0.263, (0 split)
+      kessler_k6_main.sw6  < 6.5  to the right, agree=0.686, adj=0.158, (0 split)
+      feel_good_others.sw6 splits as  RLR,      agree=0.667, adj=0.105, (0 split)
+      cigarette_freq.sw6   < 3.5  to the right, agree=0.667, adj=0.105, (0 split)
+      SDQ_peer.sw6         < 1.5  to the left,  agree=0.647, adj=0.053, (0 split)
+
+Node number 485: 9 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.001048096
+    class counts:     3     6
+   probabilities: 0.333 0.667 
+
+Node number 500: 5 observations
+  predicted class=0  expected loss=0.2  P(node) =0.0005822755
+    class counts:     4     1
+   probabilities: 0.800 0.200 
+
+Node number 501: 5 observations
+  predicted class=1  expected loss=0.4  P(node) =0.0005822755
+    class counts:     2     3
+   probabilities: 0.400 0.600 
+
+Node number 686: 22 observations
+  predicted class=0  expected loss=0.1363636  P(node) =0.002562012
+    class counts:    19     3
+   probabilities: 0.864 0.136 
+
+Node number 687: 14 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.4285714  P(node) =0.001630371
+    class counts:     8     6
+   probabilities: 0.571 0.429 
+  left son=1374 (9 obs) right son=1375 (5 obs)
+  Primary splits:
+      feel_good_others.sw6      splits as  RLL,      improve=2.1460320, (0 missing)
+      SDQ_conduct.sw6           < 0.5  to the left,  improve=1.1904760, (0 missing)
+      activitiy_status_main.sw6 < 5.5  to the right, improve=0.8126984, (0 missing)
+      feel_wrong.sw6            splits as  RLR,      improve=0.5714286, (0 missing)
+      kessler_k6_main.sw6       < 8    to the right, improve=0.4571429, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6   < 6.5  to the left,  agree=0.786, adj=0.4, (0 split)
+      feel_wrong.sw6 splits as  RLL,      agree=0.786, adj=0.4, (0 split)
+      SDQ_peer.sw6   < 0.5  to the right, agree=0.714, adj=0.2, (0 split)
+
+Node number 806: 104 observations
+  predicted class=0  expected loss=0.1538462  P(node) =0.01211133
+    class counts:    88    16
+   probabilities: 0.846 0.154 
+
+Node number 807: 32 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.3125  P(node) =0.003726563
+    class counts:    22    10
+   probabilities: 0.688 0.313 
+  left son=1614 (7 obs) right son=1615 (25 obs)
+  Primary splits:
+      SDQ_prosoc.sw6            < 1.5  to the right, improve=1.7500000, (0 missing)
+      feel_good_others.sw6      splits as  LRR,      improve=1.3136360, (0 missing)
+      SDQ_conduct.sw6           < 1.5  to the left,  improve=1.2014290, (0 missing)
+      activitiy_status_main.sw6 < 4.5  to the right, improve=1.1574070, (0 missing)
+      feel_hatred.sw6           splits as  LRL,      improve=0.7147059, (0 missing)
+  Surrogate splits:
+      SDQ_conduct.sw6 < 2.5  to the right, agree=0.812, adj=0.143, (0 split)
+
+Node number 810: 11 observations
+  predicted class=0  expected loss=0.09090909  P(node) =0.001281006
+    class counts:    10     1
+   probabilities: 0.909 0.091 
+
+Node number 811: 6 observations
+  predicted class=1  expected loss=0.1666667  P(node) =0.0006987306
+    class counts:     1     5
+   probabilities: 0.167 0.833 
+
+Node number 814: 5 observations
+  predicted class=0  expected loss=0.2  P(node) =0.0005822755
+    class counts:     4     1
+   probabilities: 0.800 0.200 
+
+Node number 815: 17 observations,    complexity param=0.00174216
+  predicted class=1  expected loss=0.3529412  P(node) =0.001979737
+    class counts:     6    11
+   probabilities: 0.353 0.647 
+  left son=1630 (12 obs) right son=1631 (5 obs)
+  Primary splits:
+      feel_hatred.sw6     splits as  LRL,      improve=1.7647060, (0 missing)
+      SDQ_peer.sw6        < 1.5  to the right, improve=0.6535948, (0 missing)
+      kessler_k6_main.sw6 < 0.5  to the left,  improve=0.6535948, (0 missing)
+      cyberbull.sw6       < 5.5  to the left,  improve=0.6434938, (0 missing)
+      cigarette_freq.sw6  < 2.5  to the left,  improve=0.6434938, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6 < 0.5  to the right, agree=0.765, adj=0.2, (0 split)
+
+Node number 914: 13 observations
+  predicted class=0  expected loss=0.07692308  P(node) =0.001513916
+    class counts:    12     1
+   probabilities: 0.923 0.077 
+
+Node number 915: 5 observations
+  predicted class=1  expected loss=0.2  P(node) =0.0005822755
+    class counts:     1     4
+   probabilities: 0.200 0.800 
+
+Node number 922: 7 observations
+  predicted class=0  expected loss=0  P(node) =0.0008151857
+    class counts:     7     0
+   probabilities: 1.000 0.000 
+
+Node number 923: 52 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.3269231  P(node) =0.006055666
+    class counts:    35    17
+   probabilities: 0.673 0.327 
+  left son=1846 (41 obs) right son=1847 (11 obs)
+  Primary splits:
+      cyberbull.sw6        < 4.5  to the right, improve=2.6717550, (0 missing)
+      SDQ_emot_s.sw6       < 8.5  to the left,  improve=1.5657750, (0 missing)
+      kessler_k6_main.sw6  < 1.5  to the left,  improve=1.4498330, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=1.1378450, (0 missing)
+      feel_not_enjoy.sw6   splits as  LRR,      improve=0.9615385, (0 missing)
+
+Node number 926: 12 observations
+  predicted class=0  expected loss=0.25  P(node) =0.001397461
+    class counts:     9     3
+   probabilities: 0.750 0.250 
+
+Node number 927: 54 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.5  P(node) =0.006288576
+    class counts:    27    27
+   probabilities: 0.500 0.500 
+  left son=1854 (23 obs) right son=1855 (31 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 3.5  to the left,  improve=1.8555400, (0 missing)
+      feel_not_enjoy.sw6   splits as  RLL,      improve=1.0150380, (0 missing)
+      SDQ_diff.sw6         < 23.5 to the left,  improve=0.9818182, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=0.9818182, (0 missing)
+      kessler_k6_main.sw6  < 7.5  to the left,  improve=0.9310345, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6        < 14.5 to the left,  agree=0.722, adj=0.348, (0 split)
+      SDQ_prosoc.sw6      < 3.5  to the left,  agree=0.722, adj=0.348, (0 split)
+      feel_not_enjoy.sw6  splits as  RLL,      agree=0.704, adj=0.304, (0 split)
+      kessler_k6_main.sw6 < 1.5  to the left,  agree=0.667, adj=0.217, (0 split)
+      sex_CM.sw6          splits as  LR,       agree=0.630, adj=0.130, (0 split)
+
+Node number 934: 10 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.4  P(node) =0.001164551
+    class counts:     6     4
+   probabilities: 0.600 0.400 
+  left son=1868 (5 obs) right son=1869 (5 obs)
+  Primary splits:
+      feel_hatred.sw6      splits as  RL-, improve=0.8, (0 missing)
+      feel_good_others.sw6 splits as  RL-, improve=0.8, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6      < 3.5  to the left,  agree=0.8, adj=0.6, (0 split)
+      SDQ_conduct.sw6     < 3.5  to the right, agree=0.8, adj=0.6, (0 split)
+      kessler_k6_main.sw6 < 2    to the right, agree=0.7, adj=0.4, (0 split)
+      feel_not_enjoy.sw6  splits as  RLL,      agree=0.7, adj=0.4, (0 split)
+      cigarette_freq.sw6  < 1.5  to the right, agree=0.7, adj=0.4, (0 split)
+
+Node number 935: 7 observations
+  predicted class=1  expected loss=0.1428571  P(node) =0.0008151857
+    class counts:     1     6
+   probabilities: 0.143 0.857 
+
+Node number 968: 19 observations
+  predicted class=0  expected loss=0.1052632  P(node) =0.002212647
+    class counts:    17     2
+   probabilities: 0.895 0.105 
+
+Node number 969: 32 observations,    complexity param=0.0029036
+  predicted class=0  expected loss=0.375  P(node) =0.003726563
+    class counts:    20    12
+   probabilities: 0.625 0.375 
+  left son=1938 (6 obs) right son=1939 (26 obs)
+  Primary splits:
+      kessler_k6_main.sw6  < 5.5  to the right, improve=2.0769230, (0 missing)
+      feel_good_others.sw6 splits as  LRL,      improve=1.2564100, (0 missing)
+      feel_not_concent.sw6 splits as  LLR,      improve=0.9657143, (0 missing)
+      SDQ_prosoc.sw6       < 1.5  to the left,  improve=0.8909091, (0 missing)
+      SDQ_peer.sw6         < 6.5  to the left,  improve=0.6000000, (0 missing)
+
+Node number 1374: 9 observations
+  predicted class=0  expected loss=0.2222222  P(node) =0.001048096
+    class counts:     7     2
+   probabilities: 0.778 0.222 
+
+Node number 1375: 5 observations
+  predicted class=1  expected loss=0.2  P(node) =0.0005822755
+    class counts:     1     4
+   probabilities: 0.200 0.800 
+
+Node number 1614: 7 observations
+  predicted class=0  expected loss=0  P(node) =0.0008151857
+    class counts:     7     0
+   probabilities: 1.000 0.000 
+
+Node number 1615: 25 observations,    complexity param=0.001045296
+  predicted class=0  expected loss=0.4  P(node) =0.002911378
+    class counts:    15    10
+   probabilities: 0.600 0.400 
+  left son=3230 (20 obs) right son=3231 (5 obs)
+  Primary splits:
+      SDQ_conduct.sw6      < 1.5  to the left,  improve=2.0000000, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=1.2857140, (0 missing)
+      SDQ_emot_s.sw6       < 1.5  to the right, improve=0.6805556, (0 missing)
+      feel_hatred.sw6      splits as  LRL,      improve=0.6363636, (0 missing)
+      feel_wrong.sw6       splits as  LR-,      improve=0.6363636, (0 missing)
+
+Node number 1630: 12 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.5  P(node) =0.001397461
+    class counts:     6     6
+   probabilities: 0.500 0.500 
+  left son=3260 (6 obs) right son=3261 (6 obs)
+  Primary splits:
+      SDQ_diff.sw6        < 4.5  to the left,  improve=0.6666667, (0 missing)
+      kessler_k6_main.sw6 < 0.5  to the left,  improve=0.6666667, (0 missing)
+      feel_restless.sw6   splits as  RLL,      improve=0.6666667, (0 missing)
+      SDQ_emot_s.sw6      < 0.5  to the right, improve=0.1714286, (0 missing)
+      feel_no_good.sw6    splits as  RLL,      improve=0.1714286, (0 missing)
+  Surrogate splits:
+      SDQ_conduct.sw6      < 0.5  to the left,  agree=0.917, adj=0.833, (0 split)
+      SDQ_prosoc.sw6       < 0.5  to the left,  agree=0.750, adj=0.500, (0 split)
+      feel_not_concent.sw6 splits as  LLR,      agree=0.750, adj=0.500, (0 split)
+      SDQ_peer.sw6         < 1.5  to the left,  agree=0.667, adj=0.333, (0 split)
+      feel_hatred.sw6      splits as  R-L,      agree=0.583, adj=0.167, (0 split)
+
+Node number 1631: 5 observations
+  predicted class=1  expected loss=0  P(node) =0.0005822755
+    class counts:     0     5
+   probabilities: 0.000 1.000 
+
+Node number 1846: 41 observations,    complexity param=0.00174216
+  predicted class=0  expected loss=0.2439024  P(node) =0.004774659
+    class counts:    31    10
+   probabilities: 0.756 0.244 
+  left son=3692 (36 obs) right son=3693 (5 obs)
+  Primary splits:
+      SDQ_emot_s.sw6       < 8.5  to the left,  improve=1.4441730, (0 missing)
+      SDQ_peer.sw6         < 6.5  to the left,  improve=1.3611860, (0 missing)
+      feel_restless.sw6    splits as  LRR,      improve=1.2648080, (0 missing)
+      kessler_k6_main.sw6  < 11   to the right, improve=1.1825570, (0 missing)
+      feel_good_others.sw6 splits as  LLR,      improve=0.9219512, (0 missing)
+  Surrogate splits:
+      feel_not_enjoy.sw6 splits as  LLR, agree=0.902, adj=0.2, (0 split)
+
+Node number 1847: 11 observations,    complexity param=0.00174216
+  predicted class=1  expected loss=0.3636364  P(node) =0.001281006
+    class counts:     4     7
+   probabilities: 0.364 0.636 
+  left son=3694 (5 obs) right son=3695 (6 obs)
+  Primary splits:
+      SDQ_diff.sw6         < 18   to the left,  improve=1.0242420, (0 missing)
+      SDQ_prosoc.sw6       < 3    to the left,  improve=1.0242420, (0 missing)
+      cyberbull.sw6        < 2.5  to the left,  improve=1.0242420, (0 missing)
+      feel_good_others.sw6 splits as  LRR,      improve=0.4909091, (0 missing)
+      feel_wrong.sw6       splits as  RLL,      improve=0.4909091, (0 missing)
+  Surrogate splits:
+      SDQ_prosoc.sw6      < 3    to the left,  agree=1.000, adj=1.0, (0 split)
+      SDQ_emot_s.sw6      < 4.5  to the left,  agree=0.818, adj=0.6, (0 split)
+      SDQ_peer.sw6        < 5.5  to the left,  agree=0.727, adj=0.4, (0 split)
+      SDQ_conduct.sw6     < 3.5  to the left,  agree=0.727, adj=0.4, (0 split)
+      kessler_k6_main.sw6 < 11.5 to the left,  agree=0.727, adj=0.4, (0 split)
+
+Node number 1854: 23 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.3478261  P(node) =0.002678467
+    class counts:    15     8
+   probabilities: 0.652 0.348 
+  left son=3708 (17 obs) right son=3709 (6 obs)
+  Primary splits:
+      SDQ_diff.sw6        < 13.5 to the right, improve=1.6504690, (0 missing)
+      SDQ_emot_s.sw6      < 2.5  to the right, improve=0.8193980, (0 missing)
+      SDQ_peer.sw6        < 6.5  to the right, improve=0.7732441, (0 missing)
+      kessler_k6_main.sw6 < 5.5  to the left,  improve=0.7732441, (0 missing)
+      SDQ_prosoc.sw6      < 2.5  to the left,  improve=0.7732441, (0 missing)
+  Surrogate splits:
+      SDQ_peer.sw6        < 4.5  to the right, agree=0.826, adj=0.333, (0 split)
+      cigarette_freq.sw6  < 4.5  to the left,  agree=0.826, adj=0.333, (0 split)
+      kessler_k6_main.sw6 < 12.5 to the left,  agree=0.783, adj=0.167, (0 split)
+
+Node number 1855: 31 observations,    complexity param=0.002264808
+  predicted class=1  expected loss=0.3870968  P(node) =0.003610108
+    class counts:    12    19
+   probabilities: 0.387 0.613 
+  left son=3710 (24 obs) right son=3711 (7 obs)
+  Primary splits:
+      cigarette_freq.sw6   < 3.5  to the left,  improve=2.7096770, (0 missing)
+      feel_not_concent.sw6 splits as  RRL,      improve=1.2205470, (0 missing)
+      SDQ_diff.sw6         < 16.5 to the left,  improve=1.1630110, (0 missing)
+      SDQ_conduct.sw6      < 3.5  to the left,  improve=0.8551320, (0 missing)
+      SDQ_peer.sw6         < 6.5  to the left,  improve=0.8430108, (0 missing)
+  Surrogate splits:
+      kessler_k6_main.sw6 < 2.5  to the right, agree=0.806, adj=0.143, (0 split)
+
+Node number 1868: 5 observations
+  predicted class=0  expected loss=0.2  P(node) =0.0005822755
+    class counts:     4     1
+   probabilities: 0.800 0.200 
+
+Node number 1869: 5 observations
+  predicted class=1  expected loss=0.4  P(node) =0.0005822755
+    class counts:     2     3
+   probabilities: 0.400 0.600 
+
+Node number 1938: 6 observations
+  predicted class=0  expected loss=0  P(node) =0.0006987306
+    class counts:     6     0
+   probabilities: 1.000 0.000 
+
+Node number 1939: 26 observations,    complexity param=0.0029036
+  predicted class=0  expected loss=0.4615385  P(node) =0.003027833
+    class counts:    14    12
+   probabilities: 0.538 0.462 
+  left son=3878 (11 obs) right son=3879 (15 obs)
+  Primary splits:
+      kessler_k6_main.sw6  < 2.5  to the left,  improve=2.9836830, (0 missing)
+      feel_not_enjoy.sw6   splits as  LLR,      improve=1.1583710, (0 missing)
+      SDQ_prosoc.sw6       < 1.5  to the left,  improve=1.0341880, (0 missing)
+      feel_not_concent.sw6 splits as  LLR,      improve=0.8468864, (0 missing)
+      SDQ_peer.sw6         < 4.5  to the right, improve=0.7326007, (0 missing)
+  Surrogate splits:
+      feel_not_enjoy.sw6   splits as  LLR,      agree=0.692, adj=0.273, (0 split)
+      feel_not_concent.sw6 splits as  LLR,      agree=0.692, adj=0.273, (0 split)
+      SDQ_peer.sw6         < 3.5  to the right, agree=0.654, adj=0.182, (0 split)
+      SDQ_emot_s.sw6       < 1    to the left,  agree=0.654, adj=0.182, (0 split)
+      SDQ_conduct.sw6      < 1.5  to the right, agree=0.654, adj=0.182, (0 split)
+
+Node number 3230: 20 observations
+  predicted class=0  expected loss=0.3  P(node) =0.002329102
+    class counts:    14     6
+   probabilities: 0.700 0.300 
+
+Node number 3231: 5 observations
+  predicted class=1  expected loss=0.2  P(node) =0.0005822755
+    class counts:     1     4
+   probabilities: 0.200 0.800 
+
+Node number 3260: 6 observations
+  predicted class=0  expected loss=0.3333333  P(node) =0.0006987306
+    class counts:     4     2
+   probabilities: 0.667 0.333 
+
+Node number 3261: 6 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.0006987306
+    class counts:     2     4
+   probabilities: 0.333 0.667 
+
+Node number 3692: 36 observations
+  predicted class=0  expected loss=0.1944444  P(node) =0.004192384
+    class counts:    29     7
+   probabilities: 0.806 0.194 
+
+Node number 3693: 5 observations
+  predicted class=1  expected loss=0.4  P(node) =0.0005822755
+    class counts:     2     3
+   probabilities: 0.400 0.600 
+
+Node number 3694: 5 observations
+  predicted class=0  expected loss=0.4  P(node) =0.0005822755
+    class counts:     3     2
+   probabilities: 0.600 0.400 
+
+Node number 3695: 6 observations
+  predicted class=1  expected loss=0.1666667  P(node) =0.0006987306
+    class counts:     1     5
+   probabilities: 0.167 0.833 
+
+Node number 3708: 17 observations
+  predicted class=0  expected loss=0.2352941  P(node) =0.001979737
+    class counts:    13     4
+   probabilities: 0.765 0.235 
+
+Node number 3709: 6 observations
+  predicted class=1  expected loss=0.3333333  P(node) =0.0006987306
+    class counts:     2     4
+   probabilities: 0.333 0.667 
+
+Node number 3710: 24 observations,    complexity param=0.002264808
+  predicted class=0  expected loss=0.5  P(node) =0.002794923
+    class counts:    12    12
+   probabilities: 0.500 0.500 
+  left son=7420 (11 obs) right son=7421 (13 obs)
+  Primary splits:
+      SDQ_peer.sw6    < 6.5  to the left,  improve=2.097902, (0 missing)
+      SDQ_emot_s.sw6  < 4.5  to the right, improve=1.500000, (0 missing)
+      SDQ_conduct.sw6 < 3.5  to the left,  improve=1.500000, (0 missing)
+      SDQ_prosoc.sw6  < 4.5  to the left,  improve=1.371429, (0 missing)
+      SDQ_diff.sw6    < 16.5 to the left,  improve=1.136842, (0 missing)
+  Surrogate splits:
+      SDQ_diff.sw6        < 21.5 to the left,  agree=0.875, adj=0.727, (0 split)
+      SDQ_prosoc.sw6      < 4.5  to the left,  agree=0.792, adj=0.545, (0 split)
+      SDQ_conduct.sw6     < 4.5  to the left,  agree=0.750, adj=0.455, (0 split)
+      kessler_k6_main.sw6 < 8.5  to the right, agree=0.625, adj=0.182, (0 split)
+      feel_not_enjoy.sw6  splits as  RL-,      agree=0.625, adj=0.182, (0 split)
+
+Node number 3711: 7 observations
+  predicted class=1  expected loss=0  P(node) =0.0008151857
+    class counts:     0     7
+   probabilities: 0.000 1.000 
+
+Node number 3878: 11 observations
+  predicted class=0  expected loss=0.1818182  P(node) =0.001281006
+    class counts:     9     2
+   probabilities: 0.818 0.182 
+
+Node number 3879: 15 observations,    complexity param=0.00174216
+  predicted class=1  expected loss=0.3333333  P(node) =0.001746827
+    class counts:     5    10
+   probabilities: 0.333 0.667 
+  left son=7758 (5 obs) right son=7759 (10 obs)
+  Primary splits:
+      SDQ_prosoc.sw6       < 1.5  to the left,  improve=1.06666700, (0 missing)
+      feel_good_others.sw6 splits as  RRL,      improve=0.55555560, (0 missing)
+      SDQ_conduct.sw6      < 2.5  to the left,  improve=0.26666670, (0 missing)
+      SDQ_emot_s.sw6       < 4.5  to the right, improve=0.23809520, (0 missing)
+      kessler_k6_main.sw6  < 4.5  to the right, improve=0.06666667, (0 missing)
+  Surrogate splits:
+      SDQ_emot_s.sw6       < 4.5  to the right, agree=0.733, adj=0.2, (0 split)
+      feel_good_others.sw6 splits as  RRL,      agree=0.733, adj=0.2, (0 split)
+      cigarette_freq.sw6   < 1.5  to the right, agree=0.733, adj=0.2, (0 split)
+      feel_restless.sw6    splits as  LRR,      agree=0.733, adj=0.2, (0 split)
+
+Node number 7420: 11 observations
+  predicted class=0  expected loss=0.2727273  P(node) =0.001281006
+    class counts:     8     3
+   probabilities: 0.727 0.273 
+
+Node number 7421: 13 observations
+  predicted class=1  expected loss=0.3076923  P(node) =0.001513916
+    class counts:     4     9
+   probabilities: 0.308 0.692 
+
+Node number 7758: 5 observations
+  predicted class=0  expected loss=0.4  P(node) =0.0005822755
+    class counts:     3     2
+   probabilities: 0.600 0.400 
+
+Node number 7759: 10 observations
+  predicted class=1  expected loss=0.2  P(node) =0.001164551
+    class counts:     2     8
+   probabilities: 0.200 0.800 
+
