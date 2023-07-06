@@ -1,0 +1,2798 @@
+---
+title: "Trabajo Fin de Master (Master's Capstone Project): Use of supervised learning to predict suicidal and non-suicidal self harm risk"
+output: pdf_document
+author: "Nicole Alexandra Frontero"
+date: "July, 2023"
+---
+
+# Preprocessing
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(dplyr) # For pipes and functions like filter, select, etc. 
+```
+
+## Set up
+
+### Executing code
+
+The code cannot be executed by others since I am not authorized to upload the data sets nor the .RDS files to the repository for this project.  However, if they were, this code could be downloaded from the GitHub repository and executed with the working directory set to that folder. 
+
+### Reading in data
+
+The research group that I worked with for my internship and this thesis, EPISAM, has worked with the U.K. Millennium Cohort research study data before and has published academic articles based on analyses done on this data set.  Researchers with EPISAM have done a tremendous amount of preprocessing this data set.  They gave me the data as well as the proprocessing files, however, I am not allowed to upload them to GitHub.
+```{r}
+# Waves 1-6: read the CSV and save to object
+MCSdata123456 <- read.csv("files-given-to-me/MCS_data.csv")
+
+# Wave 7: load the data set and then rename 
+load("files-given-to-me/MCS7.Rdata")
+MCSdata7 <- mcs7
+```
+
+## Bringing outcome and wave 6 predictors together
+
+### Outcome data
+
+We are going to get the outcome variable for suicidality.  I was given that a prior EPISAM researcher generated that contains all of the variables found in wave 7.
+
+The only variables of interest to me in this file are `GCSUIC00` and `MCSID`.  `MCSID` is the ID assigned to each participant and `GCSUIC00` is the variable that corresponds to the question "Have you ever hurt yourself on purpose in an attempt to end your life?".  Consequently, we will select `GCSUIC00` and `MCSID`.
+
+#### Select variables
+
+```{r}
+# Select the identifier and the suicidality variable
+outcome_data <- MCSdata7 %>% select(MCSID, GCSUIC00)
+```
+
+#### Re-level GCSUIC00 variable
+
+As previously mentioned, for the GCSUIC00 variable, a "Yes" response is currently assigned to 1 and a "No" response is currently assigned to 2.  This defies typical convention, so let's reassign all 2s to be 1s.   
+```{r}
+# Re-level 2s to be 0s
+outcome_data[outcome_data == "2"] <- "0"
+```
+
+#### Turn GCSUIC00 into a factor
+
+Once we finish preprocessing and exploratory data analysis, we are going to perform classification. In order to perform classification, we will need to have our outcome variable in the form of a factor.  Consequently, we will now turn the `GCSUIC00` variable into a factor.
+```{r}
+# Turn GCSUIC00 into a factor 
+outcome_data[, 2] <- as.factor(outcome_data[ , 2])
+
+# Double check that it is indeed a factor
+str(outcome_data)
+```
+We see that GCSUIC00 is now a factor with two levels: 0 and 1.
+
+### Predictor data (wave 6)
+
+#### Select only wave 6 variables 
+```{r}
+# Select only wave 6 variables
+wave6 <- MCSdata123456 %>% select(MCSID, 
+                                  ends_with(".sw6"))
+```
+
+## Join data
+```{r}
+# Join to get all rows from both outcome data and predictor data
+data_wave6_with_NA_rows <- full_join(outcome_data, 
+                                wave6, by = "MCSID")
+```
+
+## Removing rows with no data at all
+
+### Check missingness for existing dataset
+```{r, message=FALSE}
+library(Amelia)
+
+# Generate graph that shows degree of missingness
+missmap(data_wave6_with_NA_rows)
+```
+
+Across the entire dataset, there is 64% missingness.  Additionally, there are a lot of rows with no data at all.  Let's remove those.
+
+### Remove rows with no data at all
+```{r}
+# Get table of NAs true/false for each element in dataframe
+NA_table <- data_wave6_with_NA_rows %>%
+  is.na()
+
+dim(NA_table)[2] # 241 columns
+
+# Calculate the rowsums
+## If there's an NA, it will be a 1
+rowsums_NA_table <- data.frame(rowSums(NA_table))
+
+# Create a dataframe with the NA true/falses and the rowsums
+data_wave6_with_NA_rows_with_rowsums <- data.frame(cbind(
+  rowsums_NA_table$rowSums.NA_table., # rowsums
+  data_wave6_with_NA_rows # original data
+))
+```
+There are 241 columns in the NA table.  If the row sum equals the number of columns minus 1 (because we calculated rowsums with MCSID in there, and each row has MCSID), then there are all NAs in those rows.  This means that if a row has a sum of 240 it has all NAs.
+
+Let's filter out rows with all NA's.
+```{r}
+# Give a title to the variable with the row sums
+colnames(data_wave6_with_NA_rows_with_rowsums)[1] <- "row_sum"
+
+# Filter for rows with less than 240 NAs (filter out rows with 240 NAs)
+data_wave6_no_rows_all_NAs <- data_wave6_with_NA_rows_with_rowsums  %>%
+  filter(row_sum < 240)
+```
+
+Let's reassess the missingness.
+```{r}
+# Reassess the missingness
+missmap(data_wave6_no_rows_all_NAs)
+```
+
+## Choose a subset of predictor variables
+### Identify variables with less than 15% missingness
+First, we create a function that calculates the missingness in each column.
+```{r}
+# Function that calculates the missingness in each column
+prob_missing <- function(x){sum(is.na(x))/length(x)*100}
+```
+Then, we select the variables that we want to assess the missingness of.  We remove `GCSUIC00`, `row_sum`, and `MCSID` since we don't want to assess the missingness of those.  Next, we run the `prob_missing` function on the columns of interest.
+```{r}
+# Select columns that we want to assess the missingness of
+missingness_columns <- data_wave6_no_rows_all_NAs %>% select(-GCSUIC00,
+                                                             -row_sum,
+                                                             -MCSID)
+  
+# Calculate missingness across columns
+missingness_columns <- data.frame(apply(missingness_columns[,], 
+                                        2, # 2 = columns, 1 = rows
+                                        prob_missing))
+
+# Rename column name
+colnames(missingness_columns) <- c("percentage_missing")
+```
+We now filter out all rows with more than 15% missingness. 
+```{r}
+# Filter by less than 15% missing
+missingness_columns_less_15 <- missingness_columns %>% 
+  filter(percentage_missing <= 15.00) 
+```
+How many variables before and how many do we have now? 
+```{r}
+# Number of columns before filtering out variables with > 15.00% missingness
+dim(missingness_columns)[1]
+
+# Number of columns after filtering out variables with > 15.00% missingness
+dim(missingness_columns_less_15)[1]
+```
+We just went from 239 to 116 variables.  We eliminated a little over half the variables (123 variables).
+
+### Further filter out the selection of variables based on domain knowledge
+
+With the help of the professional advisor, we selected variables that are known to be implicated in suicidality to some degree.
+```{r}
+data_selected_vars <- 
+  data_wave6_no_rows_all_NAs %>% 
+  # Select variables based upon domain knowledge
+  select(MCSID,
+         GCSUIC00,
+         sex_CM.sw6,
+         work_cur_parent.sw6,
+         physical_activity_freq.sw6,
+         videogame_weekd_hours.sw6,
+         misbehave_classroom.sw6,
+         close_friends.sw6,
+         SDQ_prosoc.sw6,
+         SDQ_conduct.sw6,
+         health_CM.sw6,
+         SDQ_emot_s.sw6,
+         SDQ_peer.sw6,
+         SDQ_diff.sw6,
+         feel_trust.sw6,
+         feel_patient.sw6,
+         feel_risk.sw6,
+         take_risks.sw6,
+         antisoc_hacking12.sw6,
+         antisoc_arrested.sw6,
+         antisoc_home_perm.sw6,
+         antisoc_spray12.sw6,
+         antisoc_ASBO_weapon.sw6,
+         antisoc_ASBO_stolen.sw6,
+         antisoc_caution.sw6,
+         antisoc_knife.sw6,
+         alcohol_ever.sw6,
+         antisoc_damage12.sw6,
+         antisoc_ASBO_pushed.sw6,
+         antisoc_gang.sw6,
+         antisoc_rude12.sw6,
+         antisoc_not_paying12.sw6,
+         antisoc_police.sw6,
+         soc_sup_safe.sw6,
+         insulted.sw6,
+         antisoc_viruses12.sw6,
+         illegal_drug.sw6,
+         marijuana_cur.sw6,
+         brother_bull.sw6,
+         hurted_others.sw6,
+         victim_violent.sw6,
+         victim_stolen.sw6,
+         cyberbull.sw6,
+         victim_weapon.sw6,
+         victim_sexual.sw6,
+         couple.sw6,
+         hurted_by_others.sw6,
+         cyberbullied.sw6,
+         exerc_loss.sw6,
+         soc_sup_trust.sw6,
+         gambling_any.sw6,
+         natural_mother_alive.sw6,
+         eat_less.sw6,
+         feel_hatred.sw6,
+         self_harm.sw6,
+         feel_wrong.sw6,
+         cigarette_freq.sw6,
+         feel_good_others.sw6,
+         AUDIT_pc.sw6,
+         kessler_k6_main.sw6,
+         feel_lone.sw6,
+         feel_bad.sw6,
+         ER_worry_do.sw6,
+         activitiy_status_main.sw6,
+         feel_no_love.sw6,
+         feel_unhappy.sw6,
+         ethnic.sw6,
+         feel_not_enjoy.sw6,
+         soc_sup_close.sw6,
+         feel_cry.sw6,
+         feel_tired.sw6,
+         feel_not_concent.sw6,
+         feel_restless.sw6,
+         feel_no_good.sw6,
+         higher_qualification.sw6,
+         discipline_tell_off.sw6,
+         comm_prob_talking.sw6,
+         comm_prob_other.sw6,
+         comm_prob_understanding.sw6,
+         comm_prob_stammer.sw6,
+         close_friends_girls.sw6,
+         days_off_school.sw6,
+         temp_suspended.sw6,
+         discipline_groung.sw6,
+         adhd.sw6,
+         life_satisfaction_cm.sw6,
+         autism.sw6,
+         discipline_punish.sw6,
+         OCEAN_Neurot_main.sw6)
+```
+
+
+## Imputation
+### Reassess missingness
+We now reassess missingness to see how many missing values there are across the entire data set.  We see that now, we only have 12% missingness, unlike before, when we had 64% missingness.  It seems that the steps we took - removing rows with all NAs, selecting columns that had less than 15% missingness, and then further selecting columns based upon domain knowledge - resulted in quite a reduction in missing data across the data set. 
+```{r}
+# Reassess missingness across the data
+missmap(data_selected_vars)
+```
+
+Even though we now have only 12% missing data, we still need to impute the data.  We are going to use machine learning techniques and these techniques require no missing data.
+
+### Running, saving, and reading in the imputed data
+We used the `mice` package to predict missing values using the random forest method.  We used the default settings of `m = 5` and `maxit = 5` such that there were 5 imputations (`m`) and 5 iterations of each one (`maxit`).
+
+We saved the resulting data to an RDS file titled mice_model_data_selected_vars.rds.  Then, we read in the RDS, and use the `complete` function to extract the first imputed data set (we imputed 25).
+```{r, message = FALSE}
+library(mice)
+
+set.seed(100)
+
+# Use mice package to predict missing values
+## THIS TAKES A LONG TIME TO RUN.  NO NEED TO UNCOMMENT
+## SINCE THE RDS IS THERE WITH THE DATA!
+# mice_model_data_selected_vars <- mice(data_selected_vars[,], method='rf')
+
+# Save the data as an RDS
+# saveRDS(mice_model_data_selected_vars, file = "mice_model_data_selected_vars.rds")
+
+# Read in the data
+mice_model_data_selected_vars <- readRDS("mice_model_data_selected_vars.rds")
+
+# Take the first data set (25 were created)
+# The default is to take the first one
+mice_model_data_selected_vars_imputation1 <- complete(mice_model_data_selected_vars)
+
+# Remove MCSID
+mice_model_data_selected_vars_imputation1 <- mice_model_data_selected_vars_imputation1 %>% 
+  select(-MCSID)
+```
+
+### Check that there is no missing data
+We check to see that there is no missing data. 
+```{r}
+library(Amelia)
+missmap(mice_model_data_selected_vars_imputation1)
+```
+
+### Run summary
+```{r}
+### THIS IS COMMENTED FOR THE PURPOSE OF KNITTING THIS DOCUMENT
+### BECAUSE IT GENERATES SO MANY PAGES OF OUTPUT
+# summary(mice_model_data_selected_vars)
+```
+
+
+### Assess distribution of original and imputed data sets
+We will use density plots to compare the distributions of the original and imputed data sets. 
+```{r}
+library(lattice)
+
+# Creating density plot from mice package to compare original 
+# and imputed distributions
+## THIS TAKES A LONG TIME TO RUN.  NO NEED TO UNCOMMENT
+## SINCE THE RDS IS THERE WITH THE DATA!
+# densityplot_object <- lattice::densityplot(mice_model_data_selected_vars)
+
+# Save the data as an RDS
+# saveRDS(densityplot_object, file = "densityplot_object.rds")
+
+# Read in the data
+# This is currently commented because it was only needed once to create the pdf (see below)
+# densityplot_object <- readRDS("densityplot_object.rds")
+```
+
+We can save the density plots as a pdf.
+```{r}
+### This is commented because it was only needed to create the pdf,
+### which was already done
+### See the GitHub repository to see this file
+
+# Open pdf file
+# pdf(file = "densityplots.pdf")
+  
+# draw plots
+# densityplot_object
+```
+
+## Turn predictor variables into appropriate data types
+
+Now that we have our imputed data, we are going to transform the variables that are factors into factor format.  We already did this with the outcome variable, but we haven't done this yet with the predictor variables. 
+
+We waited until this point in the work flow to do this transformation because it is not advisable to change data types of variables before imputation.  
+
+All of the data fall into one of three categories: factors (eg. `GCSUIC00`), intervals (eg. `physical_activity_freq.sw6`, which refers to how many days a week an individual exercises), and scales (eg. `misbehave_classroom.sw6`, which is a scale of 1-4 to quantify the degree to which the participant disrupts class).
+
+We are going to turn the factors into factor format in R and leave the intervals and scales as integers.  For the rationale behind this, see the final report. 
+
+### Turn predictors that are factors into factors format in R
+```{r}
+# Create a shorter name for the imputed data set
+imputed_data <- mice_model_data_selected_vars_imputation1
+```
+
+```{r}
+# Check the data types of the variables
+str(imputed_data)
+```
+
+All of the predictor variables are in the form of integers.  
+
+We consult MCS Codebook to see the nature of each of these variables.  We identify the ones that are factors and change them accordingly.
+
+```{r}
+# Turn the factors into factor type in R
+imputed_data[, 
+             c("sex_CM.sw6",
+              "work_cur_parent.sw6",
+              "close_friends.sw6",
+              "antisoc_hacking12.sw6",
+              "antisoc_arrested.sw6",
+              "antisoc_home_perm.sw6",
+              "antisoc_spray12.sw6",
+              "antisoc_ASBO_weapon.sw6",
+              "antisoc_ASBO_stolen.sw6",
+              "antisoc_caution.sw6",
+              "antisoc_knife.sw6",
+              "alcohol_ever.sw6",
+              "antisoc_damage12.sw6",
+              "antisoc_ASBO_pushed.sw6",
+              "antisoc_rude12.sw6",
+              "antisoc_not_paying12.sw6",
+              "antisoc_police.sw6",
+              "insulted.sw6",
+              "antisoc_viruses12.sw6",
+              "illegal_drug.sw6",
+              "marijuana_cur.sw6",
+              "victim_violent.sw6",
+              "victim_stolen.sw6",
+              "victim_weapon.sw6",
+              "victim_sexual.sw6",
+              "couple.sw6",
+              "exerc_loss.sw6",
+              "gambling_any.sw6",
+              "natural_mother_alive.sw6",
+              "eat_less.sw6",
+              "self_harm.sw6",
+              "ER_worry_do.sw6",
+              "discipline_tell_off.sw6",
+              "comm_prob_talking.sw6",
+              "comm_prob_other.sw6",
+              "comm_prob_understanding.sw6",
+              "comm_prob_stammer.sw6",
+              "days_off_school.sw6",
+              "temp_suspended.sw6",
+              "discipline_groung.sw6",
+              "adhd.sw6",
+              "autism.sw6",
+              "discipline_punish.sw6",
+              "antisoc_gang.sw6",
+              "soc_sup_safe.sw6",
+              "soc_sup_trust.sw6",
+              "feel_hatred.sw6",
+              "feel_wrong.sw6",
+              "feel_good_others.sw6",
+              "feel_lone.sw6",
+              "feel_bad.sw6",
+              "feel_no_love.sw6",
+              "feel_unhappy.sw6",
+              "feel_not_enjoy.sw6",
+              "soc_sup_close.sw6",
+              "feel_cry.sw6",
+              "feel_tired.sw6",
+              "feel_not_concent.sw6",
+              "feel_restless.sw6",
+              "feel_no_good.sw6",
+              "ethnic.sw6")] <-
+  lapply(imputed_data[, 
+            c("sex_CM.sw6",
+              "work_cur_parent.sw6",
+              "close_friends.sw6",
+              "antisoc_hacking12.sw6",
+              "antisoc_arrested.sw6",
+              "antisoc_home_perm.sw6",
+              "antisoc_spray12.sw6",
+              "antisoc_ASBO_weapon.sw6",
+              "antisoc_ASBO_stolen.sw6",
+              "antisoc_caution.sw6",
+              "antisoc_knife.sw6",
+              "alcohol_ever.sw6",
+              "antisoc_damage12.sw6",
+              "antisoc_ASBO_pushed.sw6",
+              "antisoc_rude12.sw6",
+              "antisoc_not_paying12.sw6",
+              "antisoc_police.sw6",
+              "insulted.sw6",
+              "antisoc_viruses12.sw6",
+              "illegal_drug.sw6",
+              "marijuana_cur.sw6",
+              "victim_violent.sw6",
+              "victim_stolen.sw6",
+              "victim_weapon.sw6",
+              "victim_sexual.sw6",
+              "couple.sw6",
+              "exerc_loss.sw6",
+              "gambling_any.sw6",
+              "natural_mother_alive.sw6",
+              "eat_less.sw6",
+              "self_harm.sw6",
+              "ER_worry_do.sw6",
+              "discipline_tell_off.sw6",
+              "comm_prob_talking.sw6",
+              "comm_prob_other.sw6",
+              "comm_prob_understanding.sw6",
+              "comm_prob_stammer.sw6",
+              "days_off_school.sw6",
+              "temp_suspended.sw6",
+              "discipline_groung.sw6",
+              "adhd.sw6",
+              "autism.sw6",
+              "discipline_punish.sw6",
+              "antisoc_gang.sw6",
+              "soc_sup_safe.sw6",
+              "soc_sup_trust.sw6",
+              "feel_hatred.sw6",
+              "feel_wrong.sw6",
+              "feel_good_others.sw6",
+              "feel_lone.sw6",
+              "feel_bad.sw6",
+              "feel_no_love.sw6",
+              "feel_unhappy.sw6",
+              "feel_not_enjoy.sw6",
+              "soc_sup_close.sw6",
+              "feel_cry.sw6",
+              "feel_tired.sw6",
+              "feel_not_concent.sw6",
+              "feel_restless.sw6",
+              "feel_no_good.sw6",
+              "ethnic.sw6")], factor)
+```
+
+Let's check to see if that worked.
+```{r}
+# Check to see that it worked
+str(imputed_data)
+```
+
+## Create a version of data set where we scale the variables that represent scales
+For KNN and for GLM, we will want to make sure that variables that represent scales are scaled.  Consequently, we are going to use `lapply` to select scale the columns that have data that is in scale format.  
+```{r}
+# Create a copy of imputed_data and call it imputed_data_scaled 
+imputed_data_scaling <- imputed_data
+
+# Scale the columns that have variables derived from psychological scales
+imputed_data_scaling[c(6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 38, 39, 42, 46, 47, 
+                      56, 58, 59, 63, 74, 80, 85, 88)] <-
+  lapply(imputed_data_scaling[c(6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 38, 39, 42, 
+                               46, 47, 56, 58, 59, 63, 74, 80, 85, 88)], 
+         function(x) c(scale(x))
+)
+```
+
+Now, when we check the data types of `imputed_data_scaling`, we see that the variables that we wanted to scale are indeed scaled. 
+```{r}
+# Check the structure
+str(imputed_data_scaling)
+```
+
+## Train/test splits
+We are going to create two train/test splits.  The first will be for the original data set with no scaling done (`imputed_data`) and the second will be for the second data set where we scaled (`imputed_data_scaled`).
+
+### Original data set with no scaling
+First, we are going to split the original data (the one with no variable scaled) into train and test sets.  These are the training and test sets we will use for Random Forest, Classification Trees, and GAM. 
+
+#### Create a train/test split 
+```{r}
+set.seed(100)
+
+# Create a temporary ID
+imputed_data <- imputed_data %>% mutate(id = row_number())
+
+# Take sample 70% of the data
+train <- imputed_data %>% sample_frac(0.70)
+
+# Take the rest and call that the test data
+test  <- anti_join(imputed_data, train, by = 'id')
+
+# Drop the ID variable from the imputed_data, train, and test sets
+imputed_data <- select(imputed_data, -id)
+train <- select(train, -id) 
+test <- select(test, -id) 
+```
+
+#### Verify we have a stratified sample of `GCSUIC00`
+Next, we are going to make sure that we have taken a stratified sample of the outcome variable.  It is important to ensure that we have roughly equal proportions of "yes's" and "no's" to the question of suicidality in both the train and test data sets. 
+```{r}
+## TRAIN
+# Number of 0's in train
+zeroes_train <- dim(train %>% filter(GCSUIC00 == 0))[1]
+
+# Proportion of 0's in train
+zeroes_proportion_train <- zeroes_train/dim(train)[1] 
+
+# Number of 1's in train
+ones_train <- dim(train %>% filter(GCSUIC00 == 1))[1]
+
+# Proportion of 1's in train
+ones_proportion_train <- ones_train/dim(train)[1]
+
+## TEST
+# Number of 0's in test
+zeroes_test <- dim(test %>% filter(GCSUIC00 == 0))[1]
+
+# Proportion of 0's in test
+zeroes_proportion_test <- zeroes_test/dim(test)[1]
+
+# Number of 1's in test
+ones_test <- dim(test %>% filter(GCSUIC00 == 1))[1]
+
+# Proportion of 1's in test
+ones_proportion_test <- ones_test/dim(test)[1]
+
+## Print out the PROPORTIONS of 0's and 1's in train and test
+
+cat("Train: \nProportion of 0's =", round(zeroes_proportion_train, 3))
+cat("\nProportion of 1's =", round(ones_proportion_train, 3))
+
+cat("Test:\nProportion of 0's =", round(zeroes_proportion_test, 3))
+cat("\nProportion of 1's =", round(ones_proportion_test, 3))
+
+# Print out the NUMBER of 0's and 1's in train and test
+cat("Train:\nNumber of 0's =", zeroes_train)
+cat("\nNumber of 1's =", ones_train)
+
+cat("Test:\nNumber of 0's =", round(zeroes_test, 3))
+cat("\nNumber of 1's =", round(ones_test))
+```
+We see that the proportion of 0's and 1's found in the train set is identical to that of the train set. 
+
+### Data with scaled variables
+
+#### Create a train/test split 
+```{r}
+set.seed(100)
+
+# Create a temporary ID
+imputed_data_scaling <- imputed_data_scaling %>% mutate(id = row_number())
+
+# Take sample 70% of the data
+train_scaling <- imputed_data_scaling %>% sample_frac(0.70)
+
+# Take the rest and call that the test_scaling_scaling data
+test_scaling  <- anti_join(imputed_data_scaling, train_scaling, by = 'id')
+
+# Drop the ID variable from the imputed_data_scaling, train_scaling, and test_scaling sets
+imputed_data_scaling <- select(imputed_data_scaling, -id)
+train_scaling <- select(train_scaling, -id) 
+test_scaling <- select(test_scaling, -id) 
+```
+
+#### Verify we have a stratified sample of `GCSUIC00`
+Next, we are going to make sure that we have taken a stratified sample of the outcome variable.  It is important to ensure that we have roughly equal proportions of "yes's" and "no's" to the question of suicidality in both the train and test data sets. 
+```{r}
+## TRAIN
+# Number of 0's in train
+zeroes_train_scaling <- dim(train_scaling %>% filter(GCSUIC00 == 0))[1]
+
+# Proportion of 0's in train
+zeroes_proportion_train_scaling <- zeroes_train_scaling/dim(train_scaling)[1] 
+
+# Number of 1's in train
+ones_train_scaling <- dim(train_scaling %>% filter(GCSUIC00 == 1))[1]
+
+# Proportion of 1's in train
+ones_proportion_train_scaling <- ones_train_scaling/dim(train_scaling)[1]
+
+## TEST
+# Number of 0's in test
+zeroes_test_scaling <- dim(test_scaling %>% filter(GCSUIC00 == 0))[1]
+
+# Proportion of 0's in test
+zeroes_proportion_test_scaling <- zeroes_test_scaling/dim(test_scaling)[1]
+
+# Number of 1's in test
+ones_test_scaling <- dim(test_scaling %>% filter(GCSUIC00 == 1))[1]
+
+# Proportion of 1's in test
+ones_proportion_test_scaling <- ones_test_scaling/dim(test_scaling)[1]
+
+## Print out the PROPORTIONS of 0's and 1's in train and test
+
+cat("Train: \nProportion of 0's =", round(zeroes_proportion_train_scaling, 3))
+cat("\nProportion of 1's =", round(ones_proportion_train_scaling, 3))
+
+cat("Test:\nProportion of 0's =", round(zeroes_proportion_test_scaling, 3))
+cat("\nProportion of 1's =", round(ones_proportion_test_scaling, 3))
+
+# Print out the NUMBER of 0's and 1's in train and test
+cat("Train:\nNumber of 0's =", zeroes_train_scaling)
+cat("\nNumber of 1's =", ones_train_scaling)
+
+cat("Test:\nNumber of 0's =", round(zeroes_test_scaling, 3))
+cat("\nNumber of 1's =", round(ones_test_scaling))
+```
+The proportion of 0's and 1's in the test and train data is nearly identical, so we would say that we have a stratified sample.
+
+# Modeling
+
+We are going to perform 4 types of supervised machine learning models:
+1) Random Forest
+2) KNN
+3)  Classification Trees
+4) Generalized Linear Model
+
+## Random Forest
+The first model type that we will work with is Random Forest.  We will create 4 different Random Forest models, each time changing the parameters `ntree` and `mtry`. `ntree` refers to the number of trees to grow and and `mtry` refers to the number of variables randomly sampled as candidates at each split.
+```{r, message = FALSE}
+# Library what we need
+library(randomForest) # for randomForest
+library(caret) # for confusionMatrix
+```
+
+### Model A
+#### Create model
+For our first model we will set `ntree = 1000` and `mtry = 30`. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model 
+# rfA <- randomForest(GCSUIC00 ~ ., 
+#                    data = train,
+#                    ntree = 1000,
+#                    mtry = 30, 
+#                    proximity = TRUE,
+#                    importance = TRUE)
+# 
+# saveRDS(rfA, file = "rfA.rds")
+
+# Read in the data
+rfA <- readRDS("rfA.rds")
+```
+
+#### Create predictions using model on train data
+Let's see how well the model does at correctly classifying individuals as exhibiting suicidality or not on the train data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfA, predict the classes of the train data
+p1_rfA <- predict(rfA, train)
+
+# Create a confusion matrix to see how good the predictions are
+
+# Set positive = "1" so that caret handles the positive result correctly
+# Here we are saying that the positive/"yes" outcome is coded in our data as "1"
+# Without this, it was messing up the metrics like accuracy, specificity, and 
+# sensitivity
+confusionMatrix(p1_rfA, train$GCSUIC00, positive = "1")
+```
+We see that on the training data, the model does a perfect job at correctly classifying 0's and 1's.  
+
+#### Create predictions using model on test data
+Now we are going to use the model to predict the classes of the test data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfA, predict the classes of the test data
+p2_rfA <- predict(rfA, test)
+
+# Create a confusion matrix to see how good the predictions are
+confusionMatrix_rfA <- confusionMatrix(p2_rfA, test$GCSUIC00, positive = "1")
+```
+
+#### Metrics for model performance
+We are going to report on the model's performance using various metrics.  
+
+First, we print the confusion matrix.
+```{r}
+# Print the confusion matrix
+confusionMatrix_rfA
+```
+The confusion matrix not only tells us the number of true positives, true negatives, false positives, and false positives, but it also shares helpful information like the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate).
+
+The aforementioned values from this model when run on the train data are as follows:
+```{r}
+# Gather counts from the confusion matrix
+true_negatives_count_rfA <- confusionMatrix_rfA$table[1]
+false_positives_count_rfA <- confusionMatrix_rfA$table[2]
+false_negatives_count_rfA <- confusionMatrix_rfA$table[3]
+true_positives_count_rfA <- confusionMatrix_rfA$table[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_rfA, "\n")
+cat("Number of true negatives:", true_negatives_count_rfA, "\n")
+cat("Number of false positives:", false_positives_count_rfA, "\n")
+cat("Number of false negatives:", false_negatives_count_rfA, "\n")
+
+# Print out accuracy, sensitivity, and specificity
+cat("Accuracy: 93.18%")
+cat("Sensitivity: 8.10%")
+cat("Specificity: 99.30%")
+```
+
+Next, we are going to calculate the false positive rate and the false negative rate. 
+```{r}
+# False positive rate
+# FP/FP+TN
+false_positive_rate_rfA <-
+  false_positives_count_rfA/
+  (false_positives_count_rfA + true_negatives_count_rfA)
+
+cat("The false positive rate is", round(false_positive_rate_rfA, 5)*100, 
+    "percent")
+
+# False negative rate
+# FN/FN+TP
+false_negative_rate_rfA <- 
+  false_negatives_count_rfA/
+  (false_negatives_count_rfA + true_positives_count_rfA)
+
+cat("The false negative rate is", round(false_negative_rate_rfA, 4)*100, 
+    "percent")
+```
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+rfA_metrics_df <- data.frame(matrix(data = c(
+  "93.18%", # Accuracy (from the confusion matrix)
+  "8.10%", # Sensitivity (from the confusion matrix)
+  "99.30%", # Specificity (from the confusion matrix)
+  "0.70%", # False positive rate (calculated above)
+  "91.90%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+rownames(rfA_metrics_df) <- c(
+  "Accuracy",
+  "True Positive Rate (Sensitivity)",
+  "True Negative Rate (Specificity)",
+  "False Positive Rate",
+  "False Negative Rate"
+)
+```
+
+#### Variable importance plot
+We can create a variable importance plot to see the 20 variables that result in the most mean decrease in accuracy and the most mean decrease in the Gini score.
+```{r}
+varImpPlot(rfA,
+           sort = T,
+           n.var = 15,
+           main = "Top 15 - Variable Importance")
+```
+
+### Model B
+
+#### Create model
+
+For model B, we will set `ntree = 1000` and `mtry = 15`. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model 
+# rfB <- randomForest(GCSUIC00 ~ ., 
+#                    data = train,
+#                    ntree = 1000,
+#                    mtry = 15, 
+#                    proximity = TRUE,
+#                    importance = TRUE)
+
+# saveRDS(rfB, file = "rfB.rds")
+
+# Read in the data
+rfB <- readRDS("rfB.rds")
+```
+
+#### Create predictions using model on train data
+Let's see how well the model does at correctly classifying individuals as exhibiting suicidality or not on the train data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfB, predict the classes of the train data
+p1_rfB <- predict(rfB, train)
+
+# Create a confusion matrix to see how good the predictions are
+
+# Set positive = "1" so that caret handles the positive result correctly
+# Here we are saying that the positive/"yes" outcome is coded in our data as "1"
+# Without this, it was messing up the metrics like accuracy, specificity, and 
+# sensitivity
+confusionMatrix(p1_rfB, train$GCSUIC00, positive = "1")
+```
+We see that on the training data, the model does a perfect job at correctly classifying 0's and 1's.  
+
+
+#### Create predictions using model on test data
+
+Now we are going to use the model to predict the classes of the test data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfA, predict the classes of the test data
+p2_rfB <- predict(rfB, test)
+
+# Create a confusion matrix to see how good the predictions are
+confusionMatrix_rfB <- confusionMatrix(p2_rfB, test$GCSUIC00, positive = "1")
+```
+
+#### Metrics for model performance
+
+We are going to report on the model's performance using various metrics.  
+
+First, we print the confusion matrix.
+```{r}
+# Print the confusion matrix
+confusionMatrix_rfB
+```
+The confusion matrix not only tells us the number of true positives, true negatives, false positives, and false positives, but it also shares helpful information like the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate).
+
+The aforementioned values from this model when run on the train data are as follows:
+```{r}
+# Gather counts from the confusion matrix
+true_negatives_count_rfB <- confusionMatrix_rfB$table[1]
+false_positives_count_rfB <- confusionMatrix_rfB$table[2]
+false_negatives_count_rfB <- confusionMatrix_rfB$table[3]
+true_positives_count_rfB <- confusionMatrix_rfB$table[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_rfB, "\n")
+cat("Number of true negatives:", true_negatives_count_rfB, "\n")
+cat("Number of false positives:", false_positives_count_rfB, "\n")
+cat("Number of false negatives:", false_negatives_count_rfB, "\n")
+
+# Print out accuracy, sensitivity, and specificity
+cat("Accuracy: 93.34%")
+cat("Sensitivity: 7.28%")
+cat("Specificity: 99.53%")
+```
+
+Next, we are going to calculate the false positive rate and the false negative rate. 
+```{r}
+# False positive rate
+# FP/FP+TN
+false_positive_rate_rfB <-
+  false_positives_count_rfB/
+  (false_positives_count_rfB + true_negatives_count_rfB)
+
+cat("The false positive rate is", round(false_positive_rate_rfB, 4)*100, 
+    "percent")
+
+# False negative rate
+# FN/FN+TP
+false_negative_rate_rfB <- 
+  false_negatives_count_rfB/
+  (false_negatives_count_rfB + true_positives_count_rfB)
+
+cat("The false negative rate is", round(false_negative_rate_rfB, 4)*100, 
+    "percent")
+```
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+rfB_metrics_df <- data.frame(matrix(data = c(
+  "94.34%", # Accuracy (from the confusion matrix)
+  "7.28%", # Sensitivity (from the confusion matrix)
+  "99.53%", # Specificity (from the confusion matrix)
+  "0.47%", # False positive rate (calculated above)
+  "92.17%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+rownames(rfB_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+```
+
+
+#### Variable importance plot
+We can create a variable importance plot to see the 20 variables that result in the most mean decrease in accuracy and the most mean decrease in the Gini score.
+```{r}
+varImpPlot(rfB,
+           sort = T,
+           n.var = 15,
+           main = "Top 15 - Variable Importance")
+```
+
+### Model C
+For our model C, we will set `ntree = 500` and `mtry = 5`. 
+
+#### Create model
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model 
+# rfC <- randomForest(GCSUIC00 ~ ., 
+#                    data = train,
+#                    ntree = 500,
+#                    mtry = 5, 
+#                    proximity = TRUE,
+#                    importance = TRUE)
+
+# saveRDS(rfC, file = "rfC.rds")
+
+# Read in the data
+rfC <- readRDS("rfC.rds")
+```
+
+#### Create predictions using model on train data
+Let's see how well the model does at correctly classifying individuals as exhibiting suicidality or not on the train data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfC, predict the classes of the train data
+p1_rfC <- predict(rfC, train)
+
+# Create a confusion matrix to see how good the predictions are
+
+# Set positive = "1" so that caret handles the positive result correctly
+# Here we are saying that the positive/"yes" outcome is coded in our data as "1"
+# Without this, it was messing up the metrics like accuracy, specificity, and 
+# sensitivity
+confusionMatrix(p1_rfC, train$GCSUIC00, positive = "1")
+```
+We see that on the training data, the model does a nearly perfect job at correctly classifying 0's and 1's: 16 1's are misclassified as 0's. 
+
+#### Create predictions using model on test data
+
+Now we are going to use the model to predict the classes of the test data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfC, predict the classes of the test data
+p2_rfC <- predict(rfC, test)
+
+# Create a confusion matrix to see how good the predictions are
+confusionMatrix_rfC <- confusionMatrix(p2_rfC, test$GCSUIC00, positive = "1")
+```
+
+#### Metrics for model performance
+We are going to report on the model's performance using various metrics.  
+
+First, we print the confusion matrix.
+```{r}
+# Print the confusion matrix
+confusionMatrix_rfC
+```
+The confusion matrix not only tells us the number of true positives, true negatives, false positives, and false positives, but it also shares helpful information like the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate).
+
+The aforementioned values from this model when run on the train data are as follows:
+```{r}
+# Gather counts from the confusion matrix
+true_negatives_count_rfC <- confusionMatrix_rfC$table[1]
+false_positives_count_rfC <- confusionMatrix_rfC$table[2]
+false_negatives_count_rfC <- confusionMatrix_rfC$table[3]
+true_positives_count_rfC <- confusionMatrix_rfC$table[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_rfC, "\n")
+cat("Number of true negatives:", true_negatives_count_rfC, "\n")
+cat("Number of false positives:", false_positives_count_rfC, "\n")
+cat("Number of false negatives:", false_negatives_count_rfC, "\n")
+
+# Print out accuracy, sensitivity, and specificity
+cat("Accuracy: 93.32%")
+cat("Sensitivity: 4.45%")
+cat("Specificity: 99.71%")
+```
+
+Next, we are going to calculate the false positive rate and the false negative rate. 
+```{r}
+# False positive rate
+# FP/FP+TN
+false_positive_rate_rfC <-
+  false_positives_count_rfC/
+  (false_positives_count_rfC + true_negatives_count_rfC)
+
+cat("The false positive rate is", round(false_positive_rate_rfC, 4)*100, 
+    "percent")
+
+# False negative rate
+# FN/FN+TP
+false_negative_rate_rfC <- 
+  false_negatives_count_rfC/
+  (false_negatives_count_rfC + true_positives_count_rfC)
+
+cat("\nThe false negative rate is", round(false_negative_rate_rfC, 4)*100, 
+    "percent")
+```
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+rfC_metrics_df <- data.frame(matrix(data = c(
+  "93.32%", # Accuracy (from the confusion matrix)
+  "4.45%", # Sensitivity (from the confusion matrix)
+  "99.71%", # Specificity (from the confusion matrix)
+  "0.29%", # False positive rate (calculated above)
+  "95.55%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+rownames(rfC_metrics_df) <- c(
+  "Accuracy",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+```
+
+#### Variable importance plot
+We can create a variable importance plot to see the 20 variables that result in the most mean decrease in accuracy and the most mean decrease in the Gini score.
+```{r}
+varImpPlot(rfC,
+           sort = T,
+           n.var = 15,
+           main = "Top 15 - Variable Importance")
+```
+
+### Model D
+#### Create model
+For our first model we will set `ntree = 500` and `mtry = 25`. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model 
+# rfD <- randomForest(GCSUIC00 ~ ., 
+#                    data = train,
+#                    ntree = 500,
+#                    mtry = 25, 
+#                    proximity = TRUE,
+#                    importance = TRUE)
+
+# saveRDS(rfD, file = "rfD.rds")
+
+# Read in the data
+rfD <- readRDS("rfD.rds")
+```
+
+#### Create predictions using model on train data
+
+Let's see how well the model does at correctly classifying individuals as exhibiting suicidality or not on the train data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfD, predict the classes of the train data
+p1_rfD <- predict(rfD, train)
+
+# Create a confusion matrix to see how good the predictions are
+
+# Set positive = "1" so that caret handles the positive result correctly
+# Here we are saying that the positive/"yes" outcome is coded in our data as "1"
+# Without this, it was messing up the metrics like accuracy, specificity, and 
+# sensitivity
+confusionMatrix(p1_rfD, train$GCSUIC00, positive = "1")
+```
+We see that on the training data, the model does a perfect job at correctly classifying 0's and 1's.  
+
+#### Create predictions using model on test data
+
+Now we are going to use the model to predict the classes of the test data.
+```{r}
+# Set seed
+set.seed(100)
+
+# Using model rfA, predict the classes of the test data
+p2_rfD <- predict(rfD, test)
+
+# Create a confusion matrix to see how good the predictions are
+confusionMatrix_rfD <- confusionMatrix(p2_rfD, test$GCSUIC00, positive = "1")
+```
+
+#### Metrics for model performance
+
+We are going to report on the model's performance using various metrics.  
+
+First, we print the confusion matrix.
+```{r}
+# Print the confusion matrix
+confusionMatrix_rfD
+```
+The confusion matrix not only tells us the number of true positives, true negatives, false positives, and false positives, but it also shares helpful information like the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate).
+
+The aforementioned values from this model when run on the train data are as follows:
+```{r}
+# Gather counts from the confusion matrix
+true_negatives_count_rfD <- confusionMatrix_rfD$table[1]
+false_positives_count_rfD <- confusionMatrix_rfD$table[2]
+false_negatives_count_rfD <- confusionMatrix_rfD$table[3]
+true_positives_count_rfD <- confusionMatrix_rfD$table[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_rfD, "\n")
+cat("Number of true negatives:", true_negatives_count_rfD, "\n")
+cat("Number of false positives:", false_positives_count_rfD, "\n")
+cat("Number of false negatives:", false_negatives_count_rfD, "\n")
+
+# Print out accuracy, sensitivity, and specificity
+cat("Accuracy: 93.26%")
+cat("Sensitivity: 8.50%")
+cat("Specificity: 99.35%")
+```
+
+Next, we are going to calculate the false positive rate and the false negative rate. 
+```{r}
+# False positive rate
+# FP/FP+TN
+false_positive_rate_rfD <-
+  false_positives_count_rfD/
+  (false_positives_count_rfD + true_negatives_count_rfD)
+
+cat("The false positive rate is", round(false_positive_rate_rfD, 4)*100, 
+    "percent")
+
+# False negative rate
+# FN/FN+TP
+false_negative_rate_rfD <- 
+  false_negatives_count_rfD/
+  (false_negatives_count_rfD + true_positives_count_rfD)
+
+cat("\nThe false negative rate is", round(false_negative_rate_rfD, 4)*100, 
+    "percent")
+```
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+rfD_metrics_df <- data.frame(matrix(data = c(
+  "93.26%", # Accuracy (from the confusion matrix)
+  "8.50%", # Sensitivity (from the confusion matrix)
+  "99.35%", # Specificity (from the confusion matrix)
+  "0.64%", # False positive rate (calculated above)
+  "91.50%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+rownames(rfD_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+```
+
+#### Variable importance plot
+We can create a variable importance plot to see the 20 variables that result in the most mean decrease in accuracy and the most mean decrease in the Gini score.
+```{r}
+varImpPlot(rfD,
+           sort = T,
+           n.var = 15,
+           main = "Top 15 - Variable Importance")
+```
+
+### Results - Random Forest Models
+
+Let's compare results from across all the random forest models. 
+```{r}
+# Combine metrics from all 4 models
+rf_all_metrics_df <- 
+  cbind(rfA_metrics_df,
+        rfB_metrics_df,
+        rfC_metrics_df,
+        rfD_metrics_df)
+
+# Rename columns
+colnames(rf_all_metrics_df) <- c("Model A", "Model B", "Model C", "Model D")
+
+# Print table
+rf_all_metrics_df
+```
+Overall, these models all performed quite similarly.  Their overall accuracy was quite good (all greater than 93.18%).  Additionally, the specificities, or true negative rates, were all quite high (> 99.30%), indicating that the models were able to identify true negatives well.  
+
+However, the models were not able to identify true positives well, as all had low sensitivities, or true positive rates, ranging between 4.45% and 8.50%.  Also, the models had many false negatives (the false negative rates ranged between 91.50% and 95.55%), indicating that often, there were cases classified as 0's that were actually 1's.  
+
+It should be noted, though, that the false positive rates were low, meaning that there were few times when cases were predicted to be 1 and they were actually 0.
+
+With regard to variable importance, we printed out the top 15 most important variables with regard to the mean decrease in accuracy and the mean decrease in the Gini index.  When we look at the top 15 variables with regard to mean decrease in accuracy across the four models, we find 17 variables.  These variables are the following: 
+
+SDQ_diff.sw6, self_harm.sw6, feel_hatred.sw6, SDQ_peer.sw6, SDQ_emot_s.sw6, SDQ_conduct.sw6, kessler_k6_main.sw6, feel_good_others.sw6, SDQ_prosoc.sw6, cyberbull.sw6, feel_not_enjoy.sw6, cigarette_freq.sw6, feel_no_good.sw6, feel_not_concent.sw6, feel_restless.sw6, activitiy_status_main.sw6, sex_CM.sw6, feel_wrong.sw6.
+
+## Creating data set with important variables seen in the variable importance plots for the random forest models
+We looked at the important variables from the four random forest models and decided to create datasets with these variables. We will create `important_vars_from_rf_train`, by selecting the important variables from the training set and `important_vars_from_rf_test` by doing the same from the test set.
+
+We will also create `important_vars_from_rf_train_scaling` and `important_vars_from_rf_test_scaling` by selecting the important variables from `train_scaling` and `test_scaling`.
+
+### Selecting variables from train and test data (no scaling)
+```{r}
+# Creating a data set with only the variables of interest from the train data
+important_vars_from_rf_train <- 
+  train %>% select(
+    GCSUIC00, # Need to include outcome variable
+    SDQ_diff.sw6, 
+    self_harm.sw6, 
+    feel_hatred.sw6,
+    SDQ_peer.sw6,
+    SDQ_emot_s.sw6,
+    SDQ_conduct.sw6,
+    kessler_k6_main.sw6,
+    feel_good_others.sw6,
+    SDQ_prosoc.sw6,
+    cyberbull.sw6,
+    feel_not_enjoy.sw6,
+    cigarette_freq.sw6,
+    feel_no_good.sw6,
+    feel_not_concent.sw6,
+    feel_restless.sw6,
+    activitiy_status_main.sw6,
+    sex_CM.sw6,
+    feel_wrong.sw6)
+
+# Creating a data set with only the variables of interest from the test data
+important_vars_from_rf_test <- 
+  test %>% select(
+    GCSUIC00, # Need to include outcome variable
+    SDQ_diff.sw6, 
+    self_harm.sw6, 
+    feel_hatred.sw6,
+    SDQ_peer.sw6,
+    SDQ_emot_s.sw6,
+    SDQ_conduct.sw6,
+    kessler_k6_main.sw6,
+    feel_good_others.sw6,
+    SDQ_prosoc.sw6,
+    cyberbull.sw6,
+    feel_not_enjoy.sw6,
+    cigarette_freq.sw6,
+    feel_no_good.sw6,
+    feel_not_concent.sw6,
+    feel_restless.sw6,
+    activitiy_status_main.sw6,
+    sex_CM.sw6,
+    feel_wrong.sw6)
+```
+
+### Selecting variables from train and test data (with scaling)
+```{r}
+# Creating a data set with only the variables of interest from the scaled train data
+important_vars_from_rf_train_scaling <- 
+  train_scaling %>% select(
+    GCSUIC00, # Need to include outcome variable
+    SDQ_diff.sw6, 
+    self_harm.sw6, 
+    feel_hatred.sw6,
+    SDQ_peer.sw6,
+    SDQ_emot_s.sw6,
+    SDQ_conduct.sw6,
+    kessler_k6_main.sw6,
+    feel_good_others.sw6,
+    SDQ_prosoc.sw6,
+    cyberbull.sw6,
+    feel_not_enjoy.sw6,
+    cigarette_freq.sw6,
+    feel_no_good.sw6,
+    feel_not_concent.sw6,
+    feel_restless.sw6,
+    activitiy_status_main.sw6,
+    sex_CM.sw6,
+    feel_wrong.sw6)
+
+# Creating a data set with only the variables of interest from the scaled test data
+important_vars_from_rf_test_scaling <- 
+  test_scaling %>% select(
+    GCSUIC00, # Need to include outcome variable
+    SDQ_diff.sw6, 
+    self_harm.sw6, 
+    feel_hatred.sw6,
+    SDQ_peer.sw6,
+    SDQ_emot_s.sw6,
+    SDQ_conduct.sw6,
+    kessler_k6_main.sw6,
+    feel_good_others.sw6,
+    SDQ_prosoc.sw6,
+    cyberbull.sw6,
+    feel_not_enjoy.sw6,
+    cigarette_freq.sw6,
+    feel_no_good.sw6,
+    feel_not_concent.sw6,
+    feel_restless.sw6,
+    activitiy_status_main.sw6,
+    sex_CM.sw6,
+    feel_wrong.sw6)
+```
+
+
+## KNN
+The second model type that we will work with is KNN.  We will create 3 models.  All of our models will be constructed from scaled data.
+```{r, message=FALSE}
+# Library the package needed for the knn function
+library(class)
+```
+
+### Model A - All selected variables
+The first knn model we will be created using all of the variables.  Note that we are using the scaled data.  We specify k, the number of neighbors to consider, to be 3. 
+
+#### Create model
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model
+knnA <- knn(
+  # Training data, minus the outcome variable
+  select(train_scaling, -GCSUIC00), 
+  # Test data, minus the outcome variable
+  select(test_scaling, -GCSUIC00), 
+  # True classifications from training set
+  train_scaling$GCSUIC00, 
+      k = 3, 
+      prob = T)
+```
+
+#### Metrics for model performance
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(knnA, test_scaling$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_knnA <- table(knnA, test_scaling$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_knnA <- confusionMatrix_knnA[1]
+false_positives_count_knnA <- confusionMatrix_knnA[2]
+false_negatives_count_knnA <- confusionMatrix_knnA[3]
+true_positives_count_knnA <- confusionMatrix_knnA[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_knnA, "\n")
+cat("Number of true negatives:", true_negatives_count_knnA, "\n")
+cat("Number of false positives:", false_positives_count_knnA, "\n")
+cat("Number of false negatives:", false_negatives_count_knnA, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_knnA <- ((true_positives_count_knnA + true_negatives_count_knnA) / 
+  (true_negatives_count_knnA + false_positives_count_knnA +
+     false_negatives_count_knnA + true_positives_count_knnA) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_knnA, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_knnA <- ( true_positives_count_knnA / 
+  (true_positives_count_knnA + false_negatives_count_knnA) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_knnA, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_knnA <- ( true_negatives_count_knnA / 
+  (true_negatives_count_knnA + false_positives_count_knnA) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_knnA, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_knnA <-
+  false_positives_count_knnA/
+  (false_positives_count_knnA + true_negatives_count_knnA)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_knnA, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_knnA <- 
+  false_negatives_count_knnA/
+  (false_negatives_count_knnA + true_positives_count_knnA)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_knnA, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+knnA_metrics_df <- data.frame(matrix(data = c(
+  "92.45%", # Accuracy 
+  "7.63%", # Sensitivity 
+  "98.60%", # Specificity 
+  "1.4%", # False positive rate 
+  "92.37%" # False negative rate 
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(knnA_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+```
+
+```{r}
+# Change colnames
+colnames(knnA_metrics_df) <- c(
+  "")
+```
+
+```{r}
+knnA_metrics_df
+```
+
+### Model B - All selected variables
+The second knn model we will be created using all of the variables.  We use the training set to classify the outcome variable in the test set.  We specify k, the number of neighbors to consider, to be 10. 
+
+#### Create model
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model
+knnB <- knn(
+  # Training data, minus the outcome variable
+  select(train_scaling, -GCSUIC00), 
+  # Test data, minus the outcome variable
+  select(test_scaling, -GCSUIC00), 
+  # True classifications from training set
+  train_scaling$GCSUIC00, 
+  k = 10, 
+  prob = T)
+```
+
+#### Metrics for model performance
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(knnB, test_scaling$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_knnB <- table(knnB, test_scaling$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_knnB <- confusionMatrix_knnB[1]
+false_positives_count_knnB <- confusionMatrix_knnB[2]
+false_negatives_count_knnB <- confusionMatrix_knnB[3]
+true_positives_count_knnB <- confusionMatrix_knnB[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_knnB, "\n")
+cat("Number of true negatives:", true_negatives_count_knnB, "\n")
+cat("Number of false positives:", false_positives_count_knnB, "\n")
+cat("Number of false negatives:", false_negatives_count_knnB, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_knnB <- ((true_positives_count_knnB + true_negatives_count_knnB) / 
+  (true_negatives_count_knnB + false_positives_count_knnB +
+     false_negatives_count_knnB + true_positives_count_knnB) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_knnB, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_knnB <- ( true_positives_count_knnB / 
+  (true_positives_count_knnB + false_negatives_count_knnB) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_knnB, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_knnB <- ( true_negatives_count_knnB / 
+  (true_negatives_count_knnB + false_positives_count_knnB) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_knnB, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_knnB <-
+  false_positives_count_knnB/
+  (false_positives_count_knnB + true_negatives_count_knnB)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_knnB, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_knnB <- 
+  false_negatives_count_knnB/
+  (false_negatives_count_knnB + true_positives_count_knnB)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_knnB, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+knnB_metrics_df <- data.frame(matrix(data = c(
+  "93.23%", # Accuracy (from the confusion matrix)
+  "4.42%", # Sensitivity (from the confusion matrix)
+  "99.68%", # Specificity (from the confusion matrix)
+  "0.32%", # False positive rate (calculated above)
+  "95.58%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(knnB_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+```
+
+```{r}
+# Change colnames
+colnames(knnB_metrics_df) <- c(
+  "")
+```
+
+```{r}
+knnB_metrics_df
+```
+
+### Model C - Variables identified from RF as important
+The second knn model we will be created using the 18 variables identified in the random forest models to be the most important.  We use the training set to classify the outcome variable in the test set.  We specify k, the number of neighbors to consider, to be 5. 
+
+#### Create model
+```{r}
+# Set seed
+set.seed(100)
+
+# Create model
+knnC <- knn(
+  # Training data, minus the outcome variable
+  select(important_vars_from_rf_train_scaling, -GCSUIC00),
+  
+  # Test data, minus the outcome variable
+  select(important_vars_from_rf_test_scaling, -GCSUIC00),
+  
+  # True classifications from training set
+  important_vars_from_rf_train_scaling$GCSUIC00, 
+            k = 5, 
+            prob = T)
+```
+
+#### Metrics for model performance
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(knnC, important_vars_from_rf_test_scaling$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_knnC <- table(knnC, important_vars_from_rf_test_scaling$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_knnC <- confusionMatrix_knnC[1]
+false_positives_count_knnC <- confusionMatrix_knnC[2]
+false_negatives_count_knnC <- confusionMatrix_knnC[3]
+true_positives_count_knnC <- confusionMatrix_knnC[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_knnC, "\n")
+cat("Number of true negatives:", true_negatives_count_knnC, "\n")
+cat("Number of false positives:", false_positives_count_knnC, "\n")
+cat("Number of false negatives:", false_negatives_count_knnC, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_knnC <- ((true_positives_count_knnC + true_negatives_count_knnC) / 
+  (true_negatives_count_knnC + false_positives_count_knnC +
+     false_negatives_count_knnC + true_positives_count_knnC) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_knnC, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_knnC <- ( true_positives_count_knnC / 
+  (true_positives_count_knnC + false_negatives_count_knnC) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_knnC, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_knnC <- ( true_negatives_count_knnC / 
+  (true_negatives_count_knnC + false_positives_count_knnC) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_knnC, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_knnC <-
+  false_positives_count_knnC/
+  (false_positives_count_knnC + true_negatives_count_knnC)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_knnC, 4)*100, "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_knnC <- 
+  false_negatives_count_knnC/
+  (false_negatives_count_knnC + true_positives_count_knnC)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_knnC, 4)*100, "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+knnC_metrics_df <- data.frame(matrix(data = c(
+  "93.04%", # Accuracy (from the confusion matrix)
+  "8.84%", # Sensitivity (from the confusion matrix)
+  "99.15%", # Specificity (from the confusion matrix)
+  "0.85%", # False positive rate (calculated above)
+  "91.16%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(knnC_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+```
+
+```{r}
+# Change colnames
+colnames(knnC_metrics_df) <- c(
+  "")
+```
+
+```{r}
+knnC_metrics_df
+```
+
+### Results - KNN
+
+Let's compare the results from across all the KNN models.
+```{r}
+# Combine metrics from all 3 models
+knn_all_metrics_df <- 
+  cbind(knnA_metrics_df,
+        knnB_metrics_df,
+        knnC_metrics_df)
+
+# Rename columns
+colnames(knn_all_metrics_df) <- c("Model A", "Model B", "Model C")
+
+# Print table
+knn_all_metrics_df
+```
+Overall, these models all performed quite similarly.  Their overall accuracy was quite good (all greater than 92.45%).  Additionally, the specificities, or true negative rates, were all quite high (> 99.15%), indicating that the models were able to identify true negatives well.  
+
+However, the models were not able to identify true positives well, as all had low sensitivities, or true positive rates, ranging between 4.42% and 8.84%.  Also, the models had many false negatives (the false negative rates ranged between 91.16% and 95.58%), indicating that often, there were cases classified as 0's that were actually 1's.  
+
+It should be noted, though, that the false positive rates were low (ranging between 0.32% and 1.4%), meaning that there were few times when cases were predicted to be 1 and they were actually 0.
+
+## Classification Trees
+
+The third model type that we will be using is classification trees.  We will create 4 classification trees.  The first will be constructed from the original train data set, and the second model will just be a tuned version of the first model.  The third model will be will be constructed from the `important_vars_from_rf_train` data set and the fourth model will be a tuned version of the third model.
+
+### Model A - All variables
+
+```{r, message=FALSE}
+# Library packages we are going to need
+library(rpart)
+library(rpart.plot)
+```
+
+#### Create model
+
+We are going to create the tree with specifying `minsplit` (the minimum number of observations that must exist in a node in order for a split to be attempted) = 2 and `minbucket` (the minimum number of observations in any terminal leaf node) = 1.  Also, we specify `cp` (complexity parameter) = 0.001.  This means that any split that does not decrease the overall lack of fit by a factor of 0.001 will not be attempted. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Set the parameters
+controlA <- rpart.control(minsplit = 2, minbucket = 1, cp = 0.001)
+
+# Create the model
+classtreeA <- rpart(GCSUIC00 ~ ., 
+              data = train, 
+              method = 'class', # For classification tree
+              control = controlA)
+```
+
+#### Visualize tree
+We can visualize the tree that is created from the training data.
+```{r, warning=FALSE}
+rpart.plot(classtreeA)
+```
+
+#### Make predictions
+
+Next, we predict the classifications of the test data set using the tree we created.
+```{r}
+# Predict the class of the outcome variable in the test dataset using the tree 
+predict_unseenA <- predict(classtreeA, test, type = 'class')
+```
+
+#### Metrics for model assessment
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(predict_unseenA, test$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_classtreeA <- table(predict_unseenA, test$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_classtreeA <- confusionMatrix_classtreeA[1]
+false_positives_count_classtreeA <- confusionMatrix_classtreeA[2]
+false_negatives_count_classtreeA <- confusionMatrix_classtreeA[3]
+true_positives_count_classtreeA <- confusionMatrix_classtreeA[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_classtreeA, "\n")
+cat("Number of true negatives:", true_negatives_count_classtreeA, "\n")
+cat("Number of false positives:", false_positives_count_classtreeA, "\n")
+cat("Number of false negatives:", false_negatives_count_classtreeA, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_classtreeA <- ((
+  true_positives_count_classtreeA + true_negatives_count_classtreeA) / 
+  (true_negatives_count_classtreeA + false_positives_count_classtreeA +
+     false_negatives_count_classtreeA + true_positives_count_classtreeA) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_classtreeA, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_classtreeA <- ( true_positives_count_classtreeA / 
+  (true_positives_count_classtreeA + false_negatives_count_classtreeA) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_classtreeA, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_classtreeA <- ( true_negatives_count_classtreeA / 
+  (true_negatives_count_classtreeA + false_positives_count_classtreeA) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_classtreeA, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_classtreeA <-
+  false_positives_count_classtreeA/
+  (false_positives_count_classtreeA + true_negatives_count_classtreeA)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_classtreeA, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_classtreeA <- 
+  false_negatives_count_classtreeA/
+  (false_negatives_count_classtreeA + true_positives_count_classtreeA)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_classtreeA, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+classtreeA_metrics_df <- data.frame(matrix(data = c(
+  "90.52%", # Accuracy (from the confusion matrix)
+  "17.81%", # Sensitivity (from the confusion matrix)
+  "95.75%", # Specificity (from the confusion matrix)
+  "4.25%", # False positive rate (calculated above)
+  "82.19%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(classtreeA_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(classtreeA_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+classtreeA_metrics_df
+```
+
+We can also create a summary report.  However, it is multiple pages long so instead of printing it to the consolte, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "classtreeA_summary_output.txt")
+# summary(classtreeA)
+# sink(file = NULL)
+```
+
+### Model B - Tuned Version of Model A
+
+```{r, message = FALSE}
+# Library packages we are going to need
+library(rpart)
+library(rpart.plot)
+```
+
+#### Create model
+
+We are going to create the tree with specifying `minsplit` (the minimum number of observations that must exist in a node in order for a split to be attempted) = 2, which is the same as Model A, but this time, for `minbucket` (the minimum number of observations in any terminal leaf node) we are going to set it to be 5.  Also, we specify `cp` (complexity parameter) = 0.001.  This means that any split that does not decrease the overall lack of fit by a factor of 0.001 will not be attempted. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Set the parameters
+controlB <- rpart.control(minsplit = 2, minbucket = 5, cp = 0.001)
+
+# Create the model
+classtreeB <- rpart(GCSUIC00 ~ ., 
+              data = train, 
+              method = 'class', # For classification tree
+              control = controlB)
+```
+
+#### Visualize tree
+
+We can visualize the tree that is created from the training data.
+```{r, message = FALSE}
+rpart.plot(classtreeB)
+```
+
+#### Make predictions
+
+Next, we predict the classifications of the test data set using the tree we created.
+```{r}
+# Predict the class of the outcome variable in the test dataset using the tree 
+predict_unseenB <- predict(classtreeB, test, type = 'class')
+```
+
+#### Metrics for model assessment
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(predict_unseenB, test$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_classtreeB <- table(predict_unseenB, test$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_classtreeB <- confusionMatrix_classtreeB[1]
+false_positives_count_classtreeB <- confusionMatrix_classtreeB[2]
+false_negatives_count_classtreeB <- confusionMatrix_classtreeB[3]
+true_positives_count_classtreeB <- confusionMatrix_classtreeB[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_classtreeB, "\n")
+cat("Number of true negatives:", true_negatives_count_classtreeB, "\n")
+cat("Number of false positives:", false_positives_count_classtreeB, "\n")
+cat("Number of false negatives:", false_negatives_count_classtreeB, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_classtreeB <- (
+  (true_positives_count_classtreeB + true_negatives_count_classtreeB) / 
+  (true_negatives_count_classtreeB + false_positives_count_classtreeB +
+     false_negatives_count_classtreeB + true_positives_count_classtreeB) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_classtreeB, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_classtreeB <- ( true_positives_count_classtreeB / 
+  (true_positives_count_classtreeB + false_negatives_count_classtreeB) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_classtreeB, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_classtreeB <- ( true_negatives_count_classtreeB / 
+  (true_negatives_count_classtreeB + false_positives_count_classtreeB) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_classtreeB, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_classtreeB <-
+  false_positives_count_classtreeB/
+  (false_positives_count_classtreeB + true_negatives_count_classtreeB)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_classtreeB, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_classtreeB <- 
+  false_negatives_count_classtreeB/
+  (false_negatives_count_classtreeB + true_positives_count_classtreeB)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_classtreeB, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+classtreeB_metrics_df <- data.frame(matrix(data = c(
+  "91.79%", # Accuracy (from the confusion matrix)
+  "15.38%", # Sensitivity (from the confusion matrix)
+  "97.29%", # Specificity (from the confusion matrix)
+  "2.71%", # False positive rate (calculated above)
+  "84.62%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(classtreeB_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(classtreeB_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+classtreeB_metrics_df
+```
+
+We can also create a summary report.  However, it is multiple pages long so instead of printing it to the consolte, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "classtreeB_summary_output.txt")
+# summary(classtreeB)
+# sink(file = NULL)
+```
+
+### Model C - Variables Deemed Important from Random Forest Models
+
+Now we are going to try to create a classification tree from the variables deemed important in the random forest models. 
+
+```{r, message=FALSE}
+# Library packages we are going to need
+library(rpart)
+library(rpart.plot)
+```
+
+#### Create model
+
+We are going to create the tree with specifying `minsplit` (the minimum number of observations that must exist in a node in order for a split to be attempted) = 2 and `minbucket` (the minimum number of observations in any terminal leaf node) we are going to set it to be 3.  Also, we specify `cp` (complexity parameter) = 0.001.  This means that any split that does not decrease the overall lack of fit by a factor of 0.001 will not be attempted. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Set the parameters
+controlC <- rpart.control(minsplit = 2, minbucket = 3, cp = 0.001)
+
+# Create the model
+classtreeC <- rpart(GCSUIC00 ~ ., 
+              data = important_vars_from_rf_train, 
+              method = 'class', # For classification tree
+              control = controlC)
+```
+
+#### Visualize tree
+We can visualize the tree that is created from the training data.
+```{r, message=FALSE}
+rpart.plot(classtreeC)
+```
+
+#### Make predictions
+Next, we predict the classifications of the test data set using the tree we created.
+```{r}
+# Predict the class of the outcome variable in the test dataset using the tree 
+predict_unseenC <- predict(classtreeC, 
+                           important_vars_from_rf_test, type = 'class')
+```
+
+#### Metrics for model assessment
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(predict_unseenC, important_vars_from_rf_test$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_classtreeC <- table(predict_unseenC, test$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_classtreeC <- confusionMatrix_classtreeC[1]
+false_positives_count_classtreeC <- confusionMatrix_classtreeC[2]
+false_negatives_count_classtreeC <- confusionMatrix_classtreeC[3]
+true_positives_count_classtreeC <- confusionMatrix_classtreeC[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_classtreeC, "\n")
+cat("Number of true negatives:", true_negatives_count_classtreeC, "\n")
+cat("Number of false positives:", false_positives_count_classtreeC, "\n")
+cat("Number of false negatives:", false_negatives_count_classtreeC, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_classtreeC <- (
+  (true_positives_count_classtreeC + true_negatives_count_classtreeC) / 
+  (true_negatives_count_classtreeC + false_positives_count_classtreeC +
+     false_negatives_count_classtreeC + true_positives_count_classtreeC) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_classtreeC, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_classtreeC <- ( true_positives_count_classtreeC / 
+  (true_positives_count_classtreeC + false_negatives_count_classtreeC) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_classtreeC, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_classtreeC <- ( true_negatives_count_classtreeC / 
+  (true_negatives_count_classtreeC + false_positives_count_classtreeC) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_classtreeC, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_classtreeC <-
+  false_positives_count_classtreeC/
+  (false_positives_count_classtreeC + true_negatives_count_classtreeC)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_classtreeC, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_classtreeC <- 
+  false_negatives_count_classtreeC/
+  (false_negatives_count_classtreeC + true_positives_count_classtreeC)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_classtreeC, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+classtreeC_metrics_df <- data.frame(matrix(data = c(
+  "92.12%", # Accuracy (from the confusion matrix)
+  "19.43%", # Sensitivity (from the confusion matrix)
+  "97.35%", # Specificity (from the confusion matrix)
+  "2.65%", # False positive rate (calculated above)
+  "80.57%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(classtreeC_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(classtreeC_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+classtreeC_metrics_df
+```
+
+We can also create a summary report.  However, it is multiple pages long so instead of printing it to the consolte, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "classtreeC_summary_output.txt")
+# summary(classtreeC)
+# sink(file = NULL)
+```
+
+### Model D - Tuned Version of Model C
+
+Now we are going to try to create a classification tree from the variables deemed important in the random forest models. 
+
+```{r, message=FALSE}
+# Library packages we are going to need
+library(rpart)
+library(rpart.plot)
+```
+
+#### Create model
+
+We are going to create the tree with specifying `minsplit` (the minimum number of observations that must exist in a node in order for a split to be attempted) = 3 and `minbucket` (the minimum number of observations in any terminal leaf node) we are going to set it to be 5.  Also, we specify `cp` (complexity parameter) = 0.001.  This means that any split that does not decrease the overall lack of fit by a factor of 0.001 will not be attempted. 
+```{r}
+# Set seed
+set.seed(100)
+
+# Set the parameters
+controlD <- rpart.control(minsplit = 3, minbucket = 5, cp = 0.001)
+
+# Create the model
+classtreeD <- rpart(GCSUIC00 ~ ., 
+              data = important_vars_from_rf_train, 
+              method = 'class', # For classification tree
+              control = controlD)
+```
+
+#### Visualize tree
+We can visualize the tree that is created from the training data.
+```{r, message = FALSE}
+rpart.plot(classtreeD)
+```
+
+#### Make predictions
+Next, we predict the classifications of the test data set using the tree we created.
+```{r}
+# Predict the class of the outcome variable in the test dataset using the tree 
+predict_unseenD <- predict(
+  classtreeD, important_vars_from_rf_test, type = 'class')
+```
+
+#### Metrics for model assessment
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(predict_unseenD, important_vars_from_rf_test$GCSUIC00)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_classtreeD <- table(predict_unseenD, test$GCSUIC00)
+
+# Gather counts from the confusion matrix
+true_negatives_count_classtreeD <- confusionMatrix_classtreeD[1]
+false_positives_count_classtreeD <- confusionMatrix_classtreeD[2]
+false_negatives_count_classtreeD <- confusionMatrix_classtreeD[3]
+true_positives_count_classtreeD <- confusionMatrix_classtreeD[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_classtreeD, "\n")
+cat("Number of true negatives:", true_negatives_count_classtreeD, "\n")
+cat("Number of false positives:", false_positives_count_classtreeD, "\n")
+cat("Number of false negatives:", false_negatives_count_classtreeD, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_classtreeD <- (
+  (true_positives_count_classtreeD + true_negatives_count_classtreeD) / 
+  (true_negatives_count_classtreeD + false_positives_count_classtreeD +
+     false_negatives_count_classtreeD + true_positives_count_classtreeD) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_classtreeD, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_classtreeD <- ( true_positives_count_classtreeD / 
+  (true_positives_count_classtreeD + false_negatives_count_classtreeD) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_classtreeD, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_classtreeD <- ( true_negatives_count_classtreeD / 
+  (true_negatives_count_classtreeD + false_positives_count_classtreeD) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_classtreeD, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_classtreeD <-
+  false_positives_count_classtreeD/
+  (false_positives_count_classtreeD + true_negatives_count_classtreeD)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_classtreeD, 4)*100, 
+    "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_classtreeD <- 
+  false_negatives_count_classtreeD/
+  (false_negatives_count_classtreeD + true_positives_count_classtreeD)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_classtreeD, 4)*100, 
+    "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+classtreeD_metrics_df <- data.frame(matrix(data = c(
+  "92.23%", # Accuracy (from the confusion matrix)
+  "17.00%", # Sensitivity (from the confusion matrix)
+  "97.64%", # Specificity (from the confusion matrix)
+  "2.36%", # False positive rate (calculated above)
+  "83.00%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(classtreeD_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(classtreeD_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+classtreeD_metrics_df
+```
+
+We can also create a summary report.  However, it is multiple pages long so instead of printing it to the consolte, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "classtreeD_summary_output.txt")
+# summary(classtreeD)
+# sink(file = NULL)
+```
+
+
+### Results - Classification Tree Models
+Let's compare the accuracy, sensitivity, specificity, false negative rate, and false positive rate across our four models. 
+```{r}
+# Combine metrics from all 3 models
+classtree_all_metrics_df <- 
+  cbind(classtreeA_metrics_df,
+        classtreeB_metrics_df,
+        classtreeC_metrics_df,
+        classtreeD_metrics_df)
+
+# Rename columns
+colnames(classtree_all_metrics_df) <- c("Model A", "Model B", 
+                                        "Model C", "Model D")
+
+# Print table
+classtree_all_metrics_df
+```
+Overall, these models all performed quite similarly.  Their overall accuracy was quite good (all greater than 90.52%).  Additionally, the specificities, or true negative rates, were all quite high (> 95.75%), indicating that the models were able to identify true negatives well.  
+
+The models did an ok job at identifying true positives well, as all had moderately low sensitivities, or true positive rates, ranging between 15.38% and 19.43%.  However, these sensitivity rates are the lowest seen thus far (lower than those seen for random the forest models and the KNN models).  The models had many false negatives (the false negative rates ranged between 80.57% and 84.62%), indicating that often, there were cases classified as 0's that were actually 1's.  However, these rates were lower than any false negative rates seen in any of the random forest or KNN models.  
+
+It should be noted that the false positive rates were low, yet higher than those seen in the random forest and KNN models.  For the classification tree models, the false positive rates raanged between 2.36% and 4.25%.  The false positive rate indicates that there were relatively few times when cases were predicted to be 1 and they were actually 0.
+
+When we look at the txt files that contain the summary material for the classification tree models, we see that for each model, `self_harm.sw6` shows up as the most important variable followed by `SDQ_diff.sw6` (except in the case of classification tree C, where they are tied for first place in variable importance).
+
+## Generalized Linear Models
+
+For GLM models, we are going to use the train and test data sets that has the variables that represent scales actually scaled.  We are going to create two models.  The first model is going to created using all of the variables that we originally selected based on domain knowledge.  The second model is going to be created using the variables identified as important from the random forest models.  
+
+### Model A
+For our first model, we use the data sets `train_scaling` and `test_scaling`.
+
+```{r}
+# Library what we will need
+library(stats)
+```
+
+
+#### Create the model
+First, we create the model.
+```{r}
+# Create the first model
+glm_fitA <- glm(GCSUIC00 ~ ., 
+              data = train_scaling, 
+              family = binomial)
+```
+
+#### Make predictions
+
+Next, we create predictions for the response variable of the test set using the model.
+```{r}
+# Create predictions
+glm_probsA <- data.frame(probs = predict(glm_fitA, 
+                                       newdata = test_scaling, 
+                                       type = "response"))
+```
+
+#### Assign predictions to 0 or 1 based on cutoff point
+
+After that, we assign a cut off point of 0.50 to the predictions.  Values above 0.50 will be classified as 1's, while those below will be classified as 0's.  
+```{r}
+# Create a dataframe called glm_pred
+# If the prediction is >= .5, assign a 1 to the pred column
+# If the prediction is < 0.5, assign a 0 to the pred column
+glm_predA <- glm_probsA %>%
+  mutate(pred = ifelse(probs >= .5, "1", "0"))
+```
+
+Now, we add the true responses from `test_scaling` to the `glm_pred` dataframe. 
+```{r}
+# Add the true responses
+glm_predA <- cbind(test_scaling$GCSUIC00, glm_predA)
+
+# Rename the first column
+colnames(glm_predA)[1] <- c("truth")
+```
+
+#### Metrics for model assessment
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(glm_predA$pred, glm_predA$truth)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_glmA <- table(glm_predA$pred, glm_predA$truth)
+
+# Gather counts from the confusion matrix
+true_negatives_count_glmA <- confusionMatrix_glmA[1]
+false_positives_count_glmA <- confusionMatrix_glmA[2]
+false_negatives_count_glmA <- confusionMatrix_glmA[3]
+true_positives_count_glmA <- confusionMatrix_glmA[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_glmA, "\n")
+cat("Number of true negatives:", true_negatives_count_glmA, "\n")
+cat("Number of false positives:", false_positives_count_glmA, "\n")
+cat("Number of false negatives:", false_negatives_count_glmA, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_glmA <- ((true_positives_count_glmA + true_negatives_count_glmA) / 
+  (true_negatives_count_glmA + false_positives_count_glmA +
+     false_negatives_count_glmA + true_positives_count_glmA) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_glmA, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_glmA <- ( true_positives_count_glmA / 
+  (true_positives_count_glmA + false_negatives_count_glmA) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_glmA, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_glmA <- ( true_negatives_count_glmA / 
+  (true_negatives_count_glmA + false_positives_count_glmA) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_glmA, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_glmA <-
+  false_positives_count_glmA/
+  (false_positives_count_glmA + true_negatives_count_glmA)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_glmA, 4)*100, "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_glmA <- 
+  false_negatives_count_glmA/
+  (false_negatives_count_glmA + true_positives_count_glmA)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_glmA, 4)*100, "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+glmA_metrics_df <- data.frame(matrix(data = c(
+  "93.21%", # Accuracy (from the confusion matrix)
+  "10.84%", # Sensitivity (from the confusion matrix)
+  "99.13%", # Specificity (from the confusion matrix)
+  "0.87%", # False positive rate (calculated above)
+  "89.07%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(glmA_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(glmA_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+glmA_metrics_df
+```
+
+We can also run a summary on the model.  Note that these results are just from the model which was run on the training data only.  We cannot get the model summary from the test data, but that is what the confusion matrix is for.
+
+Because the summary report is multiple pages long, instead of printing it to the console, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "glm_fitA_summary_output.txt")
+# summary(glm_fitA)
+# sink(file = NULL)
+```
+
+From these results, we see that there are certain variables that show up as significant.  These variables are as follows: 
+- Significance level less than 0.0001 (***): videogame_weekd_hours.sw6, alcohol_ever.sw6, self_harm.sw6 
+
+- Significance level less than 0.001 (**):  work_cur_parent.sw6, natural_mother_alive.sw6, feel_no_love.sw6
+
+- Significance level less than 0.05 (*): antisoc_caution.sw6, feel_bad.sw6 
+
+### Model B
+For our second model, we use the data sets `important_vars_from_rf_train_scaling` and `important_vars_from_rf_test_scaling`.
+
+#### Create the model
+First, we create the model.
+```{r}
+# Create the first model
+glm_fitB <- glm(GCSUIC00 ~ ., 
+              data = important_vars_from_rf_train_scaling, 
+              family = binomial)
+```
+
+#### Make predictions
+Next, we create predictions for the response variable of the test set using the model.
+```{r}
+# Create predictions
+glm_probsB <- data.frame(probs = predict(glm_fitB, 
+                                       newdata =
+                                         important_vars_from_rf_test_scaling, 
+                                       type = "response"))
+```
+
+#### Assign predictions to 0 or 1 based on cutoff point
+
+After that, we assign a cut off point of 0.50 to the predictions.  Values above 0.50 will be classified as 1's, while those below will be classified as 0's.  
+```{r}
+# Create a dataframe called glm_pred
+# If the prediction is >= .5, assign a 1 to the pred column
+# If the prediction is < 0.5, assign a 0 to the pred column
+glm_predB <- glm_probsB %>%
+  mutate(pred = ifelse(probs >= .5, "1", "0"))
+```
+
+Now, we add the true responses from `important_vars_from_rf_test_scaling` to the `glm_pred` dataframe. 
+```{r}
+# Add the true responses
+glm_predB <- cbind(test_scaling$GCSUIC00, glm_predB)
+
+# Rename the first column
+colnames(glm_predB)[1] <- c("truth")
+```
+
+#### Metrics for model assessment
+
+We are going to report on the model's performance using various metrics.  
+
+First, we create a confusion matrix to see how well the model performs.
+```{r}
+table(glm_predB$pred, glm_predB$truth)
+```
+
+From the confusion matrix, we can see the number of true positives, true negatives, false positives, and false positives.  From these numbers, we can calculate the accuracy (the fraction of predictions the model got right), sensitivity (the true positive rate), and specificity (the true negative rate), as well as the false positive rate and the true positive rate.
+
+We calculate these values below.
+```{r}
+# Assign the confusion matrix to an object
+confusionMatrix_glmB <- table(glm_predB$pred, glm_predB$truth)
+
+# Gather counts from the confusion matrix
+true_negatives_count_glmB <- confusionMatrix_glmB[1]
+false_positives_count_glmB <- confusionMatrix_glmB[2]
+false_negatives_count_glmB <- confusionMatrix_glmB[3]
+true_positives_count_glmB <- confusionMatrix_glmB[4]
+
+# Print out the counts
+cat("Number of true positives:", true_positives_count_glmB, "\n")
+cat("Number of true negatives:", true_negatives_count_glmB, "\n")
+cat("Number of false positives:", false_positives_count_glmB, "\n")
+cat("Number of false negatives:", false_negatives_count_glmB, "\n")
+
+# Gather the accuracy
+# TP + TN / Total predictions made
+accuracy_glmB <- ((true_positives_count_glmB + true_negatives_count_glmB) / 
+  (true_negatives_count_glmB + false_positives_count_glmB +
+     false_negatives_count_glmB + true_positives_count_glmB) ) * 100
+
+# Print out the accuracy
+cat("Accuracy:", round(accuracy_glmB, 2), "percent")
+
+# Gather the sensitivity
+# TP/TP+FN
+sensitivity_glmB <- ( true_positives_count_glmB / 
+  (true_positives_count_glmB + false_negatives_count_glmB) ) * 100
+
+# Print out the sensitivity
+cat("Sensitivity:", round(sensitivity_glmB, 2), "percent")
+
+# Gather the specificity
+# TN/TN+FP
+specificity_glmB <- ( true_negatives_count_glmB / 
+  (true_negatives_count_glmB + false_positives_count_glmB) ) * 100
+
+# Print out the specificity
+cat("Specificity:", round(specificity_glmB, 2), "percent")
+
+# Gather the false positive rate
+# FP/FP+TN
+false_positive_rate_glmB <-
+  false_positives_count_glmB/
+  (false_positives_count_glmB + true_negatives_count_glmB)
+
+# Print out the false positive rate
+
+cat("\nFalse positive rate:", round(false_positive_rate_glmB, 4)*100, "percent")
+
+# Gather the false negative rate
+# FN/FN+TP
+false_negative_rate_glmB <- 
+  false_negatives_count_glmB/
+  (false_negatives_count_glmB + true_positives_count_glmB)
+
+# Print out the false negative rate
+cat("\nFalse negative rate:", round(false_negative_rate_glmB, 4)*100, "percent")
+```
+
+Now, we are going to create a table so we can easily see the accuracy, sensitivity, specificity, false positive rate, and false negative rate.
+```{r}
+# Create table
+glmB_metrics_df <- data.frame(matrix(data = c(
+  "93.37%", # Accuracy (from the confusion matrix)
+  "8.91%", # Sensitivity (from the confusion matrix)
+  "99.45%", # Specificity (from the confusion matrix)
+  "0.55%", # False positive rate (calculated above)
+  "91.09%" # False negative rate (calculated above)
+  ), nrow = 5, ncol = 1))
+```
+
+```{r}
+# Change rownames
+rownames(glmB_metrics_df) <- c(
+  "Accuracy:",
+  "True Positive Rate (Sensitivity):",
+  "True Negative Rate (Specificity):",
+  "False Positive Rate:",
+  "False Negative Rate:"
+)
+
+# Change column names
+colnames(glmB_metrics_df) <- c("")
+```
+
+```{r}
+# Print table
+glmB_metrics_df
+```
+
+We can also run a summary on the model.  Note that these results are just from the model which was run on the training data only.  We cannot get the model summary from the test data, but that is what the confusion matrix is for.
+
+Because the summary report is multiple pages long, instead of printing it to the console, we will save it as a txt file which can be found in the working directory. 
+```{r}
+### COMMENTING THIS OUT SINCE FILES HAVE ALREADY BEEN GENERATED - 
+### SEE GITHUB REPOSITORY
+# All output from in between the sink calls will get saved
+# sink(file = "glm_fitB_summary_output.txt")
+# summary(glm_fitB)
+# sink(file = NULL)
+```
+
+From these results, we see that there are certain variables that show up as significant.  These variables are as follows: 
+- Significance level less than 0.0001 (***): intercept, self_harm.sw6, 
+
+- Significance level less than 0.001 (**): activitiy_status_main.sw6, sex_CM.sw62 
+
+- Significance level less than 0.05 (*): cigarette_freq.sw6 
+
+### Results - GLM Models
+Let's compare the accuracy, sensitivity, specificity, false negative rate, and false positive rate across our two models. 
+```{r}
+# Combine metrics from all two models
+glm_all_metrics_df <- 
+  cbind(glmA_metrics_df,
+        glmB_metrics_df)
+
+# Rename columns
+colnames(glm_all_metrics_df) <- c("Model A", "Model B")
+
+# Print table
+glm_all_metrics_df
+```
+Overall, these models all performed quite similarly.  Their overall accuracy was quite good (93.21% and 93.37% for model A and B, respectively).  Additionally, the specificities, or true negative rates, were all quite high (99.13% and 99.45%, respectively), indicating that the models were able to identify true negatives well.
+
+The models did a pretty poor job at identifying true positives well, with model A having a sensitivity of 10.84% and model B having a sensitivity of 8.91%.  These rates are generally better than the sensitivities seen for the random forest and KNN models but are worse than those seen for the classification trees.  The models had many false negatives (the false negative rates ranged between 89.07% and 91.09%), indicating that often, there were cases classified as 0's that were actually 1's.  
+
+It should be noted that the false positive rates were very low (0.87% and 0.55% for models A and B, respectively).  The false positive rate indicates that there were relatively few times when cases were predicted to be 1 and they were actually 0.
+
+When we look at the txt files that contain the summary material, we see that self_harm.sw6 is significant in both models.  Then, in model A, there are significant variables - videogame_weekd_hours.sw6, alcohol_ever.sw6, work_cur_parent.sw6, natural_mother_alive.sw6, feel_no_love.sw6, antisoc_caution.sw6, and feel_bad.sw6, and these do not appear as significant in model B.  
+
+In model B, the variables that appear significant are intercept, activitiy_status_main.sw6, sex_CM.sw62, and cigarette_freq.sw6.  The discrepancy between the significant variables seen between these two models can likely be explained by the fact that model A contained all the variables and model B only contained the 17 variables deemed most important by the random forest models. 
